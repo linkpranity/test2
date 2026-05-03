@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AIレポート生成 | LINKPRANITY</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+:root{
+  --teal:#0D9E8E;--teal-light:#e6f7f5;--teal-dark:#096d61;--teal-deep:#0F4C5C;
+  --text:#1a2e2c;--text-light:#4a6360;--border:#c8e6e3;--bg:#f7fffe;--white:#ffffff;
+  --shadow:0 2px 16px rgba(13,158,142,0.08);--radius:12px;
+  --red:#e05252;--amber:#D97706;--amber-light:#FFFBEB;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
+
+/* ── Header ── */
+header{background:linear-gradient(135deg,var(--teal-deep),var(--teal));color:white;padding:0 28px;display:flex;align-items:center;justify-content:space-between;height:60px;box-shadow:0 2px 12px rgba(0,0,0,.15)}
+.h-left{display:flex;align-items:center;gap:12px}
+header img{height:30px;filter:brightness(0) invert(1);opacity:.9;object-fit:contain}
+header h1{font-size:15px;font-weight:700;letter-spacing:.05em}
+.h-right{display:flex;gap:8px}
+.h-btn{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:white;border-radius:20px;padding:6px 14px;font-size:12px;cursor:pointer;font-family:'Noto Sans JP',sans-serif;transition:background .2s;text-decoration:none;display:inline-flex;align-items:center;gap:5px}
+.h-btn:hover{background:rgba(255,255,255,.3)}
+
+.container{max-width:900px;margin:0 auto;padding:28px 20px 60px}
+
+/* ── API Key setup ── */
+.apikey-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:20px;overflow:hidden}
+.apikey-head{background:var(--teal-light);border-bottom:1px solid var(--border);padding:14px 20px;display:flex;align-items:center;gap:10px}
+.apikey-head h2{font-size:14px;font-weight:700;color:var(--teal-deep)}
+.apikey-body{padding:18px 20px;display:flex;gap:10px;align-items:center}
+.apikey-body input{flex:1;padding:11px 14px;border:1.5px solid var(--border);border-radius:8px;font-family:'Noto Sans JP',sans-serif;font-size:13px;color:var(--text);background:var(--bg);transition:border-color .2s}
+.apikey-body input:focus{outline:none;border-color:var(--teal);background:var(--white)}
+.apikey-save{background:var(--teal);color:white;border:none;border-radius:8px;padding:11px 18px;font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;transition:background .2s}
+.apikey-save:hover{background:var(--teal-dark)}
+.apikey-status{font-size:12px;color:var(--teal);display:none;margin-top:6px}
+
+/* ── Section Card ── */
+.card{background:var(--white);border-radius:var(--radius);border:1px solid var(--border);margin-bottom:20px;overflow:hidden;box-shadow:var(--shadow)}
+.card-head{background:var(--teal-light);border-bottom:1px solid var(--border);padding:14px 20px;display:flex;align-items:center;justify-content:space-between}
+.card-head h2{font-size:14px;font-weight:700;color:var(--teal-deep)}
+.card-body{padding:20px}
+
+/* ── Client Info Display ── */
+.client-info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.ci-box{background:var(--teal-light);border:1px solid var(--border);border-radius:8px;padding:12px 14px}
+.ci-label{font-size:11px;font-weight:700;color:var(--text-light);letter-spacing:.04em;margin-bottom:4px}
+.ci-val{font-size:14px;font-weight:700;color:var(--teal-deep)}
+
+/* ── Stats ── */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.stat-box{background:var(--teal-light);border:1px solid var(--border);border-radius:8px;padding:14px;text-align:center}
+.stat-num{font-family:'DM Serif Display',serif;font-size:30px;color:var(--teal);line-height:1;margin-bottom:4px}
+.stat-lbl{font-size:11px;color:var(--text-light);font-weight:500}
+
+/* ── Generate button ── */
+.gen-section{text-align:center;padding:10px 0 6px}
+.gen-btn-main{background:linear-gradient(135deg,var(--teal),var(--teal-dark));color:white;border:none;border-radius:50px;padding:16px 52px;font-family:'Noto Sans JP',sans-serif;font-size:15px;font-weight:700;cursor:pointer;letter-spacing:.05em;box-shadow:0 4px 20px rgba(13,158,142,.35);transition:all .3s;position:relative}
+.gen-btn-main:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 28px rgba(13,158,142,.45)}
+.gen-btn-main:disabled{opacity:.55;cursor:not-allowed;transform:none}
+.gen-note{font-size:11.5px;color:var(--text-light);margin-top:10px}
+
+/* ── Loading ── */
+.loading-wrap{display:none;text-align:center;padding:40px 20px}
+.loading-wrap.show{display:block}
+.loading-spinner{width:48px;height:48px;border:4px solid var(--teal-light);border-top-color:var(--teal);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-msg{font-size:13px;color:var(--text-light);line-height:1.7}
+.loading-dots::after{content:'';animation:dots 1.5s steps(4,end) infinite}
+@keyframes dots{0%,20%{content:''}40%{content:'.'}60%{content:'..'}80%,100%{content:'...'}}
+
+/* ── Report Output ── */
+#reportOutput{display:none}
+.report-actions{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap}
+.action-btn{display:flex;align-items:center;gap:6px;padding:10px 18px;border-radius:8px;font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;border:1.5px solid transparent}
+.action-btn-primary{background:var(--teal);color:white;border-color:var(--teal)}
+.action-btn-primary:hover{background:var(--teal-dark)}
+.action-btn-secondary{background:var(--white);color:var(--teal);border-color:var(--border)}
+.action-btn-secondary:hover{border-color:var(--teal);background:var(--teal-light)}
+
+/* ── Report Content ── */
+#reportContent{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:40px;box-shadow:var(--shadow);line-height:1.8}
+#reportContent h1{font-family:'DM Serif Display',serif;font-size:24px;color:var(--teal-deep);margin-bottom:6px}
+#reportContent .report-sub{font-size:12.5px;color:var(--text-light);margin-bottom:28px;padding-bottom:16px;border-bottom:2px solid var(--teal-light)}
+#reportContent h2{font-size:16px;font-weight:700;color:var(--teal-deep);margin:28px 0 12px;padding-left:12px;border-left:4px solid var(--teal)}
+#reportContent h3{font-size:14px;font-weight:700;color:var(--teal);margin:18px 0 8px}
+#reportContent p{font-size:13.5px;color:var(--text);margin-bottom:12px;line-height:1.85}
+#reportContent ul,#reportContent ol{padding-left:20px;margin-bottom:12px}
+#reportContent li{font-size:13.5px;color:var(--text);margin-bottom:6px;line-height:1.75}
+#reportContent .highlight-box{background:var(--teal-light);border-left:4px solid var(--teal);border-radius:0 8px 8px 0;padding:14px 16px;margin:14px 0;font-size:13px}
+#reportContent .alert-box{background:#fef8f0;border-left:4px solid var(--amber);border-radius:0 8px 8px 0;padding:14px 16px;margin:14px 0;font-size:13px}
+#reportContent .danger-box{background:#fdf0f0;border-left:4px solid var(--red);border-radius:0 8px 8px 0;padding:14px 16px;margin:14px 0;font-size:13px}
+#reportContent table{width:100%;border-collapse:collapse;margin:14px 0;font-size:13px}
+#reportContent table th{background:var(--teal-light);color:var(--teal-deep);padding:9px 12px;text-align:left;font-weight:700;font-size:12px}
+#reportContent table td{padding:9px 12px;border-bottom:1px solid var(--border)}
+#reportContent .report-footer{margin-top:32px;padding-top:16px;border-top:2px solid var(--teal-light);font-size:11.5px;color:var(--text-light);text-align:center}
+
+/* ── Error ── */
+.error-box{background:#fdf0f0;border:1px solid #f5cccc;border-radius:8px;padding:14px 16px;font-size:13px;color:var(--red);margin-top:14px;display:none}
+.error-box.show{display:block}
+
+/* ── Print ── */
+@media print{
+  header,.action-btn,.apikey-card,.gen-section,.report-actions,.loading-wrap,button{display:none!important}
+  body{background:white}
+  .container{padding:0;max-width:100%}
+  #reportOutput{display:block!important}
+  #reportContent{border:none;box-shadow:none;padding:20px}
+  @page{size:A4;margin:15mm}
+  h2,h3{break-after:avoid}
+  p,li{break-inside:avoid}
+}
+
+@media(max-width:600px){
+  .stats-row{grid-template-columns:1fr 1fr}
+  .client-info-grid{grid-template-columns:1fr}
+  .container{padding:16px}
+  #reportContent{padding:20px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="h-left">
+    <img src="logo.linkpranity.png" alt="LINKPRANITY" onerror="this.style.display='none'">
+    <h1>AI分析レポート生成</h1>
+  </div>
+  <div class="h-right">
+    <a class="h-btn" href="admin.html">← 管理画面</a>
+    <a class="h-btn" href="index.html" target="_blank">アンケートを見る ↗</a>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- API Key -->
+  <div class="apikey-card">
+    <div class="apikey-head">
+      <h2>🔑 Anthropic APIキー設定</h2>
+    </div>
+    <div class="apikey-body">
+      <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-... を入力してください">
+      <button class="apikey-save" onclick="saveApiKey()">保存</button>
+    </div>
+    <div id="apiKeyStatus" class="apikey-status" style="padding:0 20px 14px">✅ APIキーが設定されています</div>
+  </div>
+
+  <!-- Client Info -->
+  <div class="card">
+    <div class="card-head">
+      <h2>🏢 クライアント情報</h2>
+      <a href="admin.html" style="font-size:12px;color:var(--teal);text-decoration:none">管理画面で編集 →</a>
+    </div>
+    <div class="card-body">
+      <div class="client-info-grid" id="clientInfoGrid">
+        <div class="ci-box"><div class="ci-label">クライアント名</div><div class="ci-val" id="ciName">—</div></div>
+        <div class="ci-box"><div class="ci-label">従業員数</div><div class="ci-val" id="ciEmp">—</div></div>
+        <div class="ci-box"><div class="ci-label">実施月</div><div class="ci-val" id="ciMonth">—</div></div>
+        <div class="ci-box" style="grid-column:1/-1"><div class="ci-label">事業内容</div><div class="ci-val" id="ciBiz" style="font-size:13px;font-weight:400;line-height:1.6">—</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Data Summary -->
+  <div class="card">
+    <div class="card-head"><h2>📊 回答データ概要</h2></div>
+    <div class="card-body">
+      <div class="stats-row">
+        <div class="stat-box"><div class="stat-num" id="dsTotal">0</div><div class="stat-lbl">総回答数</div></div>
+        <div class="stat-box"><div class="stat-num" id="dsConsult">0</div><div class="stat-lbl">個別相談希望</div></div>
+        <div class="stat-box"><div class="stat-num" id="dsTurnover">0</div><div class="stat-lbl">退職検討あり</div></div>
+        <div class="stat-box"><div class="stat-num" id="dsHarass">0</div><div class="stat-lbl">懸念記述あり</div></div>
+      </div>
+      <p id="noDataMsg" style="font-size:13px;color:var(--text-light);display:none">⚠️ 回答データがありません。先にアンケートを実施してください。</p>
+    </div>
+  </div>
+
+  <!-- Generate -->
+  <div class="gen-section">
+    <button class="gen-btn-main" id="genBtn" onclick="generateReport()">
+      ✨ AIレポートを生成する
+    </button>
+    <p class="gen-note">回答データとクライアント情報を基に、課題分析・改善提案レポートをAIが自動生成します</p>
+  </div>
+
+  <div class="error-box" id="errorBox"></div>
+
+  <!-- Loading -->
+  <div class="loading-wrap" id="loadingWrap">
+    <div class="loading-spinner"></div>
+    <div class="loading-msg">
+      AIが回答データを分析しています<span class="loading-dots"></span><br>
+      <span style="font-size:12px;margin-top:6px;display:block">しばらくお待ちください（30〜60秒程度）</span>
+    </div>
+  </div>
+
+  <!-- Report Output -->
+  <div id="reportOutput">
+    <div class="card">
+      <div class="card-head"><h2>📄 生成済みレポート</h2></div>
+      <div class="card-body" style="padding:16px">
+        <div class="report-actions">
+          <button class="action-btn action-btn-primary" onclick="window.print()">🖨️ 印刷 / PDF保存</button>
+          <button class="action-btn action-btn-secondary" onclick="copyReport()">📋 テキストをコピー</button>
+          <button class="action-btn action-btn-secondary" onclick="regenerate()">🔄 再生成</button>
+        </div>
+        <div id="reportContent"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ── API Key ── */
+function saveApiKey(){
+  const v=document.getElementById('apiKeyInput').value.trim();
+  if(!v){alert('APIキーを入力してください');return}
+  sessionStorage.setItem('lpApiKey',v);
+  document.getElementById('apiKeyInput').value='';
+  document.getElementById('apiKeyStatus').style.display='block';
+}
+function loadApiKeyStatus(){
+  if(sessionStorage.getItem('lpApiKey')){
+    document.getElementById('apiKeyStatus').style.display='block';
+  }
+}
+
+/* ── Client & Stats ── */
+function loadClientDisplay(){
+  const meta=JSON.parse(localStorage.getItem('reportMeta')||'{}');
+  document.getElementById('ciName').textContent=meta.name||'（未設定）';
+  document.getElementById('ciEmp').textContent=meta.emp?meta.emp+'名':'（未設定）';
+  document.getElementById('ciMonth').textContent=meta.month||'（未設定）';
+  document.getElementById('ciBiz').textContent=meta.biz||'（未設定）';
+}
+
+function loadDataStats(){
+  const rs=JSON.parse(localStorage.getItem('surveyResponses')||'[]');
+  document.getElementById('dsTotal').textContent=rs.length;
+  document.getElementById('dsConsult').textContent=rs.filter(r=>r.answers?.consult==='はい、希望する').length;
+  document.getElementById('dsTurnover').textContent=rs.filter(r=>['よく考える','たまに考える'].includes(r.answers?.turnover_exp)).length;
+  document.getElementById('dsHarass').textContent=rs.filter(r=>(r.answers?.harassment&&r.answers.harassment.trim())||(r.answers?.incident&&r.answers.incident.trim())).length;
+  if(!rs.length)document.getElementById('noDataMsg').style.display='block';
+  else document.getElementById('noDataMsg').style.display='none';
+}
+
+/* ── Build prompt ── */
+function buildPrompt(rs, meta){
+  const total=rs.length;
+
+  /* 各設問の集計 */
+  function countRadio(key){
+    const c={};rs.forEach(r=>{const v=r.answers?.[key];if(v)c[v]=(c[v]||0)+1;});return c;
+  }
+  function countCheck(key){
+    const c={};rs.forEach(r=>{const v=r.answers?.[key];if(Array.isArray(v))v.forEach(i=>c[i]=(c[i]||0)+1);});return c;
+  }
+  function freeTexts(key){
+    return rs.map(r=>r.answers?.[key]).filter(v=>v&&v.trim()).join('\n---\n');
+  }
+
+  const fmt=obj=>Object.entries(obj).map(([k,v])=>`  ${k}: ${v}名`).join('\n');
+
+  const prompt=`あなたはLINKPRANITY（リンクプラニティ）の専属アナリストです。
+以下の従業員アンケート結果を分析し、経営者に提出する「離職率改善レポート」を日本語で作成してください。
+
+## クライアント情報
+- 会社名: ${meta.name||'未設定'}
+- 従業員数: ${meta.emp||'未設定'}名
+- 事業内容: ${meta.biz||'未設定'}
+- 実施月: ${meta.month||'未設定'}
+- 有効回答数: ${total}名
+
+## アンケート集計データ
+
+### Q1 勤続年数
+${fmt(countRadio('tenure'))}
+
+### Q2 所属区分
+${fmt(countRadio('dept'))}
+
+### Q3 やりがいを感じる点（複数回答）
+${fmt(countCheck('ikigai'))}
+
+### Q4 意見・アイデアを活かせているか
+${fmt(countRadio('idea'))}
+
+### Q5 人間関係（良好度）
+${fmt(countRadio('relations_good'))}
+
+### Q6 人間関係（満足度）
+${fmt(countRadio('relations'))}
+
+### Q7 コミュニケーションストレス
+${fmt(countRadio('comm_stress'))}
+
+### Q8 意見の対立・解決
+${fmt(countRadio('conflict'))}
+
+### Q9 支援体制満足度
+${fmt(countRadio('support'))}
+
+### Q10 改善してほしい点（複数回答）
+${fmt(countCheck('improve'))}
+
+### Q11 長く働き続けたいか
+${fmt(countRadio('stay_long'))}
+
+### Q12 退職を考えた経験
+${fmt(countRadio('turnover_exp'))}
+
+### Q16 個別相談希望
+${fmt(countRadio('consult'))}
+
+## 自由記述（抜粋）
+
+### 活かせていない理由
+${freeTexts('idea_detail')||'（記述なし）'}
+
+### 良好でない人間関係の詳細
+${freeTexts('relations_good_detail')||'（記述なし）'}
+
+### 人間関係の不満
+${freeTexts('relations_detail')||'（記述なし）'}
+
+### コミュニケーションストレス詳細
+${freeTexts('comm_stress_detail')||'（記述なし）'}
+
+### 解決への希望
+${freeTexts('conflict_detail')||'（記述なし）'}
+
+### 支援体制の不満
+${freeTexts('support_detail')||'（記述なし）'}
+
+### 定着しない理由
+${freeTexts('stay_long_detail')||'（記述なし）'}
+
+### 継続・離職の理由（自由記述）
+${freeTexts('stay_reason')||'（記述なし）'}
+
+### ハラスメント・重大懸念
+${freeTexts('harassment')||'（記述なし）'}
+
+### 気になる言動
+${freeTexts('incident')||'（記述なし）'}
+
+---
+
+## レポート作成指示
+
+以下の構成でレポートを作成してください。HTMLタグは使わず、マークダウン形式で出力してください。
+
+1. **エグゼクティブサマリー**（経営者が最初に読む3〜5行のまとめ）
+2. **データ概要**（回答者属性・回答率など）
+3. **主要課題の分析**（数値根拠を示しながら、優先度順に3〜5項目）
+4. **リスクアラート**（ハラスメント・退職リスク・要注意事項。該当なければ「特記事項なし」と記載）
+5. **改善提案**（短期施策・中長期施策に分けて具体的に提案）
+6. **個別相談希望者への対応方針**
+7. **次回アンケートに向けた提言**
+
+各セクションは具体的な数値・割合を引用し、経営判断に使えるレベルの内容にしてください。
+ポジティブな点も必ず記載し、バランスのとれた報告書としてください。`;
+
+  return prompt;
+}
+
+/* ── Generate ── */
+async function generateReport(){
+  const apiKey=sessionStorage.getItem('lpApiKey');
+  if(!apiKey){alert('APIキーを設定してください。');return}
+
+  const rs=JSON.parse(localStorage.getItem('surveyResponses')||'[]');
+  if(!rs.length){alert('回答データがありません。先にアンケートを実施してください。');return}
+
+  const meta=JSON.parse(localStorage.getItem('reportMeta')||'{}');
+  const prompt=buildPrompt(rs,meta);
+
+  document.getElementById('genBtn').disabled=true;
+  document.getElementById('loadingWrap').classList.add('show');
+  document.getElementById('reportOutput').style.display='none';
+  document.getElementById('errorBox').classList.remove('show');
+
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:4000,
+        messages:[{role:'user',content:prompt}]
+      })
+    });
+
+    if(!res.ok){
+      const err=await res.json();
+      throw new Error(err.error?.message||'API エラー: '+res.status);
+    }
+
+    const data=await res.json();
+    const text=data.content?.find(b=>b.type==='text')?.text||'';
+
+    renderReport(text,meta,rs.length);
+  }catch(e){
+    const eb=document.getElementById('errorBox');
+    eb.textContent='エラーが発生しました: '+e.message;
+    eb.classList.add('show');
+  }finally{
+    document.getElementById('genBtn').disabled=false;
+    document.getElementById('loadingWrap').classList.remove('show');
+  }
+}
+
+/* ── Render ── */
+function renderReport(md, meta, total){
+  const now=new Date();
+  const dateStr=now.toLocaleDateString('ja-JP',{year:'numeric',month:'long',day:'numeric'});
+
+  /* Markdown → HTML 簡易変換 */
+  let html=`<h1>離職率改善レポート</h1>
+<div class="report-sub">
+  クライアント：${meta.name||'—'} ／ 実施月：${meta.month||'—'} ／ 有効回答数：${total}名 ／ 作成日：${dateStr}<br>
+  作成：株式会社LINKPRANITY（リンクプラニティ）
+</div>`;
+
+  html+=mdToHtml(md);
+
+  html+=`<div class="report-footer">
+    本レポートはLINKPRANITY 月次アンケートシステムにより自動生成されました。<br>
+    内容に関するお問い合わせ：iwashita@linkpranity.com ／ TEL：03-5931-3147
+  </div>`;
+
+  document.getElementById('reportContent').innerHTML=html;
+  document.getElementById('reportOutput').style.display='block';
+  document.getElementById('reportOutput').scrollIntoView({behavior:'smooth'});
+}
+
+function mdToHtml(md){
+  let html=md
+    .replace(/^### (.+)$/gm,'<h3>$1</h3>')
+    .replace(/^## (.+)$/gm,'<h2>$1</h2>')
+    .replace(/^# (.+)$/gm,'<h1>$1</h1>')
+    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g,'<em>$1</em>')
+    .replace(/^---$/gm,'<hr>')
+    .replace(/^> (.+)$/gm,'<div class="highlight-box">$1</div>')
+    .replace(/^⚠️ (.+)$/gm,'<div class="alert-box">⚠️ $1</div>')
+    .replace(/^🚨 (.+)$/gm,'<div class="danger-box">🚨 $1</div>');
+
+  /* リスト処理 */
+  const lines=html.split('\n');
+  const out=[];
+  let inUl=false,inOl=false;
+  lines.forEach(line=>{
+    const ul=line.match(/^[\-\*] (.+)/);
+    const ol=line.match(/^\d+\. (.+)/);
+    if(ul){if(!inUl){out.push('<ul>');inUl=true}if(inOl){out.push('</ol>');inOl=false}out.push('<li>'+ul[1]+'</li>')}
+    else if(ol){if(!inOl){out.push('<ol>');inOl=true}if(inUl){out.push('</ul>');inUl=false}out.push('<li>'+ol[1]+'</li>')}
+    else{
+      if(inUl){out.push('</ul>');inUl=false}
+      if(inOl){out.push('</ol>');inOl=false}
+      if(line.trim()&&!line.startsWith('<')){out.push('<p>'+line+'</p>')}
+      else{out.push(line)}
+    }
+  });
+  if(inUl)out.push('</ul>');
+  if(inOl)out.push('</ol>');
+  return out.join('\n');
+}
+
+function copyReport(){
+  const el=document.getElementById('reportContent');
+  const text=el.innerText;
+  navigator.clipboard.writeText(text).then(()=>{
+    const b=event.currentTarget;const orig=b.textContent;
+    b.textContent='✅ コピーしました';setTimeout(()=>b.textContent=orig,2000);
+  });
+}
+
+function regenerate(){
+  if(!confirm('レポートを再生成しますか？現在のレポートは上書きされます。'))return;
+  generateReport();
+}
+
+/* ── Init ── */
+loadApiKeyStatus();
+loadClientDisplay();
+loadDataStats();
+</script>
+</body>
+</html>

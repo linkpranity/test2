@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>離職率改善アンケート | LINKPRANITY</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --teal:        #0D9E8E;
+    --teal-light:  #e6f7f5;
+    --teal-mid:    #0b8a7c;
+    --teal-dark:   #096d61;
+    --teal-deep:   #0F4C5C;
+    --text:        #1a2e2c;
+    --text-light:  #4a6360;
+    --border:      #c8e6e3;
+    --bg:          #f7fffe;
+    --white:       #ffffff;
+    --shadow:      0 2px 16px rgba(13,158,142,0.08);
+    --radius:      12px;
+    --amber:       #D97706;
+    --amber-light: #FFFBEB;
+  }
+  *,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: 60px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ─── Header ─── */
+  header {
+    background: var(--white);
+    border-bottom: 2px solid var(--teal);
+    padding: 18px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 12px rgba(13,158,142,0.1);
+  }
+  header img { height: 36px; object-fit: contain; }
+  .header-text h1 { font-size: 16px; font-weight: 700; color: var(--teal); letter-spacing: 0.05em; }
+  .header-text p  { font-size: 11px; color: var(--text-light); margin-top: 1px; }
+
+  /* ─── Hero ─── */
+  .hero {
+    background: linear-gradient(135deg, var(--teal-deep) 0%, var(--teal) 100%);
+    color: var(--white);
+    padding: 40px 24px 36px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::after {
+    content: 'REAL VOICES';
+    position: absolute;
+    right: -10px; bottom: -12px;
+    font-size: 64px; font-weight: 900;
+    color: rgba(255,255,255,.05);
+    letter-spacing: -.02em;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+  .hero-badge {
+    display: inline-block;
+    background: rgba(255,255,255,.2);
+    border: 1px solid rgba(255,255,255,.4);
+    color: white;
+    font-size: 11px; font-weight: 500;
+    padding: 4px 14px;
+    border-radius: 20px;
+    letter-spacing: .08em;
+    margin-bottom: 14px;
+  }
+  .hero h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 26px; font-weight: 400; line-height: 1.4;
+    margin-bottom: 10px;
+  }
+  .hero p { font-size: 13px; opacity: .88; line-height: 1.7; max-width: 480px; margin: 0 auto; }
+
+  /* ─── Notice ─── */
+  .notice { max-width: 720px; margin: 24px auto 0; padding: 0 20px; }
+  .notice-box {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 22px;
+    box-shadow: var(--shadow);
+  }
+  .notice-item {
+    display: flex; align-items: flex-start; gap: 10px;
+    font-size: 13px; color: var(--text-light); line-height: 1.65;
+    margin-bottom: 10px;
+  }
+  .notice-item:last-child { margin-bottom: 0; }
+  .notice-icon {
+    width: 20px; height: 20px;
+    background: var(--teal-light);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; flex-shrink: 0; margin-top: 1px;
+    color: var(--teal); font-weight: 900;
+    border: 1px solid var(--border);
+  }
+  .notice-footer {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: 16px; padding-top: 14px;
+    border-top: 1px solid var(--border);
+  }
+  .time-badge { font-size: 12px; color: var(--text-light); }
+  .btn-start {
+    background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+    color: white; border: none; border-radius: 30px;
+    padding: 11px 28px;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 14px; font-weight: 700; cursor: pointer;
+    letter-spacing: .04em;
+    box-shadow: 0 4px 14px rgba(13,158,142,.3);
+    transition: all .2s;
+  }
+  .btn-start:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(13,158,142,.4); }
+
+  /* ─── Form Container ─── */
+  .form-container { max-width: 720px; margin: 24px auto; padding: 0 20px; display: none; }
+
+  /* ─── Section ─── */
+  .section {
+    background: var(--white);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    margin-bottom: 20px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    animation: fadeUp .4s ease both;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .section-header {
+    background: var(--teal-light);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 20px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .section-num {
+    width: 26px; height: 26px;
+    background: var(--teal); color: white;
+    border-radius: 50%;
+    font-size: 12px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .section-title { font-size: 14px; font-weight: 700; color: var(--teal-deep); }
+  .section-body { padding: 20px; }
+
+  /* ─── Question ─── */
+  .question { margin-bottom: 24px; }
+  .question:last-child { margin-bottom: 0; }
+  .q-label {
+    font-size: 13.5px; font-weight: 600; color: var(--text);
+    margin-bottom: 4px; line-height: 1.6;
+  }
+  .q-label .required { color: #e05252; font-size: 11px; margin-left: 4px; font-weight: 400; }
+  .q-label .optional  { color: var(--text-light); font-size: 11px; margin-left: 4px; font-weight: 400; }
+  .q-sub { font-size: 11.5px; color: var(--text-light); margin-bottom: 12px; line-height: 1.6; }
+
+  /* ─── Radio ─── */
+  .options { display: flex; flex-direction: column; gap: 8px; }
+  .option-label {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer; font-size: 13px; color: var(--text);
+    transition: all .2s; background: var(--bg);
+  }
+  .option-label:hover { border-color: var(--teal); background: var(--teal-light); }
+  .option-label input[type="radio"] { accent-color: var(--teal); width: 16px; height: 16px; flex-shrink: 0; }
+  .option-label:has(input:checked) { border-color: var(--teal); background: var(--teal-light); }
+  .option-label:has(input:checked) span { color: var(--teal-deep); font-weight: 600; }
+
+  /* ─── Checkbox pills ─── */
+  .check-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+  .check-pill {
+    display: flex; align-items: center; gap: 7px;
+    padding: 7px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 20px;
+    cursor: pointer; font-size: 13px; color: var(--text);
+    transition: all .15s; background: var(--bg); user-select: none;
+  }
+  .check-pill:has(input:checked) { border-color: var(--teal); background: var(--teal-light); color: var(--teal-deep); font-weight: 600; }
+  .check-pill:hover { border-color: var(--teal); background: var(--teal-light); }
+  .check-pill input { accent-color: var(--teal); width: 15px; height: 15px; flex-shrink: 0; }
+
+  /* ─── Followup box ─── */
+  .followup-box {
+    background: var(--bg);
+    border-left: 3px solid var(--teal);
+    border-radius: 0 8px 8px 0;
+    padding: 12px 12px 12px 14px;
+    margin-top: 10px;
+    display: none;
+  }
+  .followup-box.show { display: block; animation: fadeUp .2s ease; }
+  .fu-label { font-size: 12.5px; font-weight: 700; color: var(--teal-deep); margin-bottom: 6px; }
+  .fu-note  { font-size: 11.5px; color: var(--text-light); margin-bottom: 8px; }
+
+  /* ─── Textarea ─── */
+  textarea {
+    width: 100%;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 13px; color: var(--text);
+    background: var(--bg);
+    resize: vertical; min-height: 90px;
+    transition: border-color .2s; line-height: 1.7;
+  }
+  textarea:focus { outline: none; border-color: var(--teal); background: var(--white); }
+  textarea::placeholder { color: #aac8c5; }
+
+  /* ─── Privacy ─── */
+  .privacy-link-box {
+    background: var(--teal-light);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 18px;
+    display: flex; align-items: flex-start; gap: 12px;
+    margin-bottom: 16px;
+    font-size: 12.5px; color: var(--text-light); line-height: 1.7;
+  }
+  .privacy-link-box a { color: var(--teal); font-weight: 600; text-decoration: none; }
+  .privacy-link-box a:hover { text-decoration: underline; }
+  .privacy-check {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer; font-size: 13px; background: var(--bg);
+    transition: all .2s;
+  }
+  .privacy-check:has(input:checked) { border-color: var(--teal); background: var(--teal-light); }
+  .privacy-check input { accent-color: var(--teal); width: 17px; height: 17px; flex-shrink: 0; }
+
+  /* ─── Submit ─── */
+  .submit-area { text-align: center; padding: 10px 0; }
+  .submit-btn {
+    background: linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%);
+    color: white; border: none; border-radius: 50px;
+    padding: 16px 48px;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 15px; font-weight: 700; cursor: pointer;
+    letter-spacing: .05em;
+    box-shadow: 0 4px 20px rgba(13,158,142,.35);
+    transition: all .3s;
+  }
+  .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(13,158,142,.45); }
+
+  /* ─── Thank you ─── */
+  .thankyou { display: none; text-align: center; padding: 60px 30px; }
+  .thankyou-icon {
+    width: 72px; height: 72px;
+    background: var(--teal-light);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 20px;
+    font-size: 32px;
+    border: 2px solid var(--border);
+  }
+  .thankyou h2 { font-family: 'DM Serif Display', serif; font-size: 24px; color: var(--teal); margin-bottom: 12px; }
+  .thankyou p  { font-size: 13px; color: var(--text-light); line-height: 1.8; }
+
+  /* ─── Consult Popup Modal ─── */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.55);
+    z-index: 1000;
+    align-items: center; justify-content: center;
+    padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--white);
+    border-radius: 20px;
+    width: 100%; max-width: 480px;
+    box-shadow: 0 24px 60px rgba(0,0,0,.22);
+    overflow: hidden;
+    animation: popIn .25s cubic-bezier(.34,1.56,.64,1);
+  }
+  @keyframes popIn {
+    from { transform: scale(.88); opacity: 0; }
+    to   { transform: scale(1);   opacity: 1; }
+  }
+  .modal-top {
+    background: linear-gradient(135deg, var(--teal-deep), var(--teal));
+    padding: 24px 26px 20px;
+    color: white;
+  }
+  .modal-top h3 { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+  .modal-top p  { font-size: 12.5px; opacity: .88; line-height: 1.65; }
+  .modal-body { padding: 22px 26px 26px; }
+  .modal-body p { font-size: 13px; color: var(--text-light); line-height: 1.75; margin-bottom: 18px; }
+  .modal-cta {
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .btn-reserve {
+    display: block; text-align: center;
+    background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+    color: white; text-decoration: none;
+    border-radius: 30px; padding: 14px 24px;
+    font-size: 14px; font-weight: 700;
+    letter-spacing: .04em;
+    box-shadow: 0 4px 16px rgba(13,158,142,.35);
+    transition: all .2s;
+  }
+  .btn-reserve:hover { transform: translateY(-1px); box-shadow: 0 6px 22px rgba(13,158,142,.45); }
+  .btn-reserve small { display: block; font-size: 11px; font-weight: 400; opacity: .85; margin-top: 3px; }
+  .modal-email {
+    background: var(--teal-light);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 13px 16px;
+    font-size: 12px; color: var(--text-light); line-height: 1.75;
+  }
+  .modal-email strong { color: var(--teal-deep); }
+  .modal-close-btn {
+    display: block; width: 100%; margin-top: 14px;
+    background: none; border: 1.5px solid var(--border);
+    border-radius: 30px; padding: 11px;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 13px; color: var(--text-light); cursor: pointer;
+    transition: all .2s;
+  }
+  .modal-close-btn:hover { border-color: var(--teal); color: var(--teal); }
+
+  /* ─── Footer ─── */
+  footer { text-align: center; padding: 24px; font-size: 11px; color: #aaa; }
+  footer a { color: var(--teal); text-decoration: none; }
+
+  @media (max-width: 600px) {
+    .hero h2 { font-size: 20px; }
+    .notice-footer { flex-direction: column; gap: 12px; align-items: flex-start; }
+    .modal-top { padding: 20px; }
+    .modal-body { padding: 18px 20px 22px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <img src="logo.linkpranity.png" alt="LINKPRANITY" onerror="this.style.display='none'">
+  <div class="header-text">
+    <h1>LINKPRANITY</h1>
+    <p>従業員満足度・定着率改善プログラム</p>
+  </div>
+</header>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-badge">🔒 匿名・厳秘保護</div>
+  <h2>離職率改善アンケート</h2>
+  <p>皆さまが安心して働ける職場づくりのために実施しています。<br>日々感じていることを、率直に教えていただけると助かります。</p>
+</div>
+
+<!-- Intro Notice -->
+<div class="notice" id="introNotice">
+  <div class="notice-box">
+    <div class="notice-item"><div class="notice-icon">✓</div><span>本フォームは匿名で実施しています</span></div>
+    <div class="notice-item"><div class="notice-icon">✓</div><span>個人が特定される情報（メールアドレス、IPアドレス）は収集していません</span></div>
+    <div class="notice-item"><div class="notice-icon">✓</div><span>回答内容は個人評価には一切使用しません</span></div>
+    <div class="notice-item"><div class="notice-icon">✓</div><span>回答の有無や内容によって不利益が生じることはありません</span></div>
+    <div class="notice-footer">
+      <span class="time-badge">⏱ 所要時間：約3〜5分</span>
+      <button class="btn-start" onclick="startSurvey()">回答を始める →</button>
+    </div>
+  </div>
+</div>
+
+<!-- Form -->
+<div class="form-container" id="formContainer">
+
+  <!-- Section 1: 基本情報 -->
+  <div class="section" style="animation-delay:.05s">
+    <div class="section-header"><div class="section-num">1</div><div class="section-title">基本情報</div></div>
+    <div class="section-body">
+
+      <div class="question">
+        <div class="q-label">Q1. 勤続年数を教えてください<span class="required">必須</span></div>
+        <div class="options">
+          <label class="option-label"><input type="radio" name="tenure" value="1年未満" required><span>1年未満</span></label>
+          <label class="option-label"><input type="radio" name="tenure" value="1〜3年"><span>1〜3年</span></label>
+          <label class="option-label"><input type="radio" name="tenure" value="3〜5年"><span>3〜5年</span></label>
+          <label class="option-label"><input type="radio" name="tenure" value="5〜10年"><span>5〜10年</span></label>
+          <label class="option-label"><input type="radio" name="tenure" value="10年以上"><span>10年以上</span></label>
+        </div>
+      </div>
+
+      <div class="question">
+        <div class="q-label">Q2. 所属区分を教えてください<span class="required">必須</span></div>
+        <div class="options">
+          <label class="option-label"><input type="radio" name="dept" value="経営・役員" required><span>経営・役員</span></label>
+          <label class="option-label"><input type="radio" name="dept" value="管理職（部長・課長）"><span>管理職（部長・課長）</span></label>
+          <label class="option-label"><input type="radio" name="dept" value="リーダー・主任"><span>リーダー・主任</span></label>
+          <label class="option-label"><input type="radio" name="dept" value="一般社員"><span>一般社員</span></label>
+          <label class="option-label"><input type="radio" name="dept" value="パート・アルバイト"><span>パート・アルバイト</span></label>
+          <label class="option-label"><input type="radio" name="dept" value="その他" onchange="showFu('fu_dept', true)"><span>その他</span></label>
+        </div>
+        <div class="followup-box" id="fu_dept">
+          <div class="fu-label">所属区分を具体的にご記入ください</div>
+          <div class="fu-note">例：派遣社員、契約社員、顧問 など</div>
+          <textarea name="dept_other" rows="2" placeholder="自由にご記入ください"></textarea>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Section 2: やりがい・成長 -->
+  <div class="section" style="animation-delay:.1s">
+    <div class="section-header"><div class="section-num">2</div><div class="section-title">やりがい・成長</div></div>
+    <div class="section-body">
+
+      <div class="question">
+        <div class="q-label">Q3. 現在の仕事で特にやりがいを感じる点は何ですか？<span class="required">必須</span><br><span style="font-size:11.5px;font-weight:400;color:var(--text-light);">（複数回答可）</span></div>
+        <div class="check-grid">
+          <label class="check-pill"><input type="checkbox" name="ikigai" value="責任を持って取り組めること"><span>責任を持って取り組めること</span></label>
+          <label class="check-pill"><input type="checkbox" name="ikigai" value="成果が見えること"><span>成果が見えること</span></label>
+          <label class="check-pill"><input type="checkbox" name="ikigai" value="チームやお客様に喜ばれること"><span>チームやお客様に喜ばれること</span></label>
+          <label class="check-pill"><input type="checkbox" name="ikigai" value="自身のスキルアップができること"><span>自身のスキルアップができること</span></label>
+          <label class="check-pill"><input type="checkbox" name="ikigai" value="新しいことに挑戦できること"><span>新しいことに挑戦できること</span></label>
+          <label class="check-pill"><input type="checkbox" name="ikigai" value="その他" id="ikigai_other_cb" onchange="toggleFuCheck(this,'fu_ikigai')"><span>その他</span></label>
+        </div>
+        <div class="followup-box" id="fu_ikigai">
+          <div class="fu-label">「その他」について、具体的に教えてください</div>
+          <textarea name="ikigai_other" rows="2" placeholder="自由にご記入ください"></textarea>
+        </div>
+      </div>
+
+      <div class="question">
+        <div class="q-label">Q4. 仕事において、自分の意見やアイデアを活かせていると感じますか？<span class="required">必須</span></div>
+        <div class="options">
+          <label class="option-label"><input type="radio" name="idea" value="よく活かせている" required><span>よく活かせている</span></label>
+          <label class="option-label"><input type="radio" name="idea" value="やや活かせている"><span>やや活かせている</span></label>
+          <label class="option-label"><input type="radio" name="idea" value="あまり活かせていない" onchange="showFu('fu_idea', true)"><span>あまり活かせていない</span></label>
+          <label class="option-label"><input type="radio" name="idea" value="全く活かせていない" onchange="showFu('fu_idea', true)"><span>全く活かせていない</span></label>
+        </div>
+        <div class="followup-box" id="fu_idea">
+          <div class="fu-label">どのような場面で活かせていないと感じますか？</div>
+          <div class="fu-note">例：意見を言う機会がない、提案しても通らないことが多い など</div>
+          <textarea name="idea_detail" rows="3" placeholder="自由にご記入ください"></textarea>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Section 3: 人間関係 -->
+  <div class="section" style="animation-delay:.15s">
+    <div class="section-header"><div class="section-num">3</div><div class="section-title">人間関係・コミュニケーション</div></div>
+    <div class="section-body">
+
+      <div class="question">
+        <div class="q-label">Q5. 職場の人間関係について、良好だと感じていますか？<span class="required">必須</span></div>
+        <div class="options">
+          <label class="option-label"><input type="radio" name="relations_good" value="とても良好" required><span>とても良好</span></label>
+          <label class="option-label"><input type="radio" name="relations_good" value="やや良好"><span>やや良好</span></label>
+          <label class="option-label"><input type="radio" name="relations_good" value="あまり良好ではない" onchange="showFu('fu_relations_good', true)"><span>あまり良好ではない</span></label>
+          <label class="option-label"><input type="radio" name="relations_good" value="良好ではない" onchange="showFu('fu_relations_good', true)"><span>良好ではない</span></label>
+        </div>
+        <div class="followup-box" id="fu_relations_good">
+          <div class="fu-label">具体的にどのような部分が良好でないと感じていますか？</div>
+          <div class="fu-note">例：特定の人との関係がぎこちない、グループができていて話しかけにくい など</div>
+          <textarea name="relations_good_detail" rows="3" placeholder="自由にご記入ください"></textarea>
+        </div>
+      </div>
+
+      <div class="question">
+        <div class="q-label">Q6. 職場内の人間関係について、どのように感じていますか？<span class="required">必須</span></div>
+        <div class="options">
+          <label class="option-label"><input type="radio" name="relations" value="とても満足している" required><span>とても満足している</span></label>
+          <label class="option-label"><input type="radio" name="relations" value="やや満足している"><span>やや満足している</span></label>
+          <label class="option-label"><input type="radio" name="relations" value="どちらでもない"><span>どちらでもない</span></label>
+          <label class="option-label"><input type="radio" name="relations" value="やや不満" onchange="showFu('fu_relations', true)"><span>やや不満</span></label>
+          <label class="option-label"><input type="radio" name="relations" value="とても不満" onchange="showFu('fu_relations', true)"><span>とても不満</span></label>
+        </div>
+        <div class="followup-box" id="fu_relations">
+          <div class="fu-label">どのような不満をお持ちか教えてください</div>
+          <div class="fu-note">例：意見を言いづらい場面がある など</div>
+          <textarea name="relations_detail" rows="3" placeholder="自由にご記入ください"></textarea>
+        </div>
+      </div>
+
+      <div class="question">
+        <div class="q-label">Q7. 上司や同僚とのコミュニケーションに不安やストレスはありますか？<span class="required">必須</span></div>
+        <div class="options">
+          <label class="option-label"><input type="radio" name="comm_stress" value="まったくない" required><span>まったくない</span></label>
+          <label class="option-label"><input type="radio" name="comm_stress" value="ほとんどない"><span>ほとんどない</span></label>
+          <label class="option-label"><input type="radio" name="comm_stress" value="多少ある" onchange="showFu('fu_comm_stress', true)"><span>多少ある</span></label>
+          <label class="option-label"><input type="radio" name="comm_stress" value="とてもある" onchange="showFu('fu_comm_stress', true)"><span>とてもある</span></label>
+        </div>
+        <div class="followup-box" id="fu_comm_stress">
+          <div class="fu-label">どのような場面でストレスを感じますか？</div>
+          <div class="fu-note">例：指示が分かりにくい、意見を言いにくい など</div>
+          <textarea name="comm_stress_detail" rows="3" placeholder="自由にご記入ください"></textarea>
+        </div>
+      </div>
+
+      <div class="question">
+        <div class="q-label">Q8. 意見の対立や認識の違いがあった際、どのように感じていますか？<span class="required">必須</span></div>
+        <div class="options">
+          <label class="option-label"><input type="radio" name="conflict" value="納得したうえで解決している" required><span>納得したうえで解決している</span></label>
+          <label class="option-label"><input type="radio" name="conflict" value="納得はしていないが解決はしている" onchange="showFu('fu_conflict', true)"><span>納得はしていないが解決はしている</span></label>
+          <label class="option-label"><input type="radio" name="conflict" value="納得も解決もしていない" onchange="showFu('fu_conflict', true)"><span>納得も解決もしていない</span></label>
+          <label class="option-label"><input type="radio" name="conflict" value="対立や誤解はほとんどない"><span>対立や誤解はほとんどない</span></label>
+        </div>
+        <div class="followup-box" id="fu_conflict">
+          <div class="fu-label">どうすれば納得できるのか、解決に向けての希望があれば教えてください</div>
+          <div class="fu-note">例：話し合う時間が足りない／第三者の調整があるとよい など</div>
+          <textarea name="conflict_detail" rows="3" placeholder="自由にご記入ください"></textarea>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Section 4: 支援体制・待遇 -->
+  <div class="section" style="animation-delay:.2s">
+    <div class="section-header"><div class="section-num">4</div><div class="section-title">支援体制・職場環境・待遇</div></div>
+    <div class="section-body">
+
+      <div class="question">
+        <div class="q-label">Q9. 現在の職場の支援体制（相談しやすさやサポート体制）について、どのように感じていますか？<span class="required">必須</span></div>
+        <div class="options">
+          <label class="option-label"><input type="radio" name="support" value="とても満足" required><span>とても満足</span></label>
+          <label class="option-label"><input type="radio" name="support" value="やや満足"><span>やや満足</span></label>
+          <label class="option-label"><input type="radio" name="support" value="どちらでもない"><span>どちらでもない</span></label>
+          <label class="option-label"><input type="radio" name="support" value="やや不満" onchange="showFu('fu_support', true)"><span>やや不満</span></label>
+          <label class="option-label"><input type="radio" name="support" value="とても不満" onchange="showFu('fu_support', true)"><span>とても不満</span></label>
+        </div>
+        <div class="followup-box" id="fu_support">
+          <div class="fu-label">どのような点に不満を感じますか？</div>
+          <div class="fu-note">例：相談できる人がいない、忙しそうで声をかけづらい など</div>
+          <textarea name="support_detail" rows="3" placeholder="自由にご記入ください"></textarea>
+        </div>
+      </div>
+
+      <div class="question">
+        <div class="q-label">Q10. 職場の環境や待遇について、改善してほしい点はありますか？<span class="required">必須</span><br><span style="font-size:11.5px;font-weight:400;color:var(--text-light);">（複数回答可）</span></div>
+        <div class="check-grid">
+          <label class="check-pill"><input type="checkbox" name="improve" value="ハラスメント"><span>ハラスメント</span></label>
+          <label class="check-pill"><input type="checkbox" name="improve" value="人間関係"><span>人間関係</span></label>
+          <label class="check-pill"><input type="checkbox" name="improve" value="評価制度"><span>評価制度</span></label>
+          <label class="check-pill"><input type="checkbox" name="improve" value="給与・待遇"><span>給与・待遇</span></label>
+          <label class="check-pill"><input type="checkbox" name="improve" value="業務量"><span>業務量</span></label>
+          <label class="check-pill"><input type="checkbox" name="improve" value="経営方針"><span>経営方針</span></label>
+          <label class="check-pill"><input type="checkbox" name="improve" value="コンプライアンス"><span>コンプライアンス</span></label>
+          <label class="check-pill"><input type="checkbox" name="improve" value="情報共有不足"><span>情報共有不足</span></label>
+          <label class="check-pill"><input type="checkbox" name="improve" value="将来への不安"><span>将来への不安</span></label>
+          <label class="check-pill"><input type="checkbox" name="improve" value="特になし"><span>特になし</span></label>
+          <label class="check-pill"><input type="checkbox" name="improve" value="その他" onchange="toggleFuCheck(this,'fu_improve')"><span>その他</span></label>
+        </div>
+        <div class="followup-box" id="fu_improve">
+          <div class="fu-label">「その他」について、具体的に教えてください</div>
+          <textarea name="improve_other" rows="2" placeholder="自由にご記入ください"></textarea>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Section 5: 定着・離職意向 -->
+  <div class="section" style="animation-delay:.25s">
+    <div class="section-header"><div class="section-num">5</div><div class="section-title">定着・離職意向</div></div>
+    <div class="section-body">
+
+      <div class="question">
+        <div class="q-label">Q11. この職場で長く働き続けたいと思いますか？<span class="required">必須</span></div>
+        <div class="options">
+          <label class="option-label"><input type="radio" name="stay_long" value="とても思う" required><span>とても思う</span></label>
+          <label class="option-label"><input type="radio" name="stay_long" value="やや思う"><span>やや思う</span></label>
+          <label class="option-label"><input type="radio" name="stay_long" value="あまり思わない" onchange="showFu('fu_stay_long', true)"><span>あまり思わない</span></label>
+          <label class="option-label"><input type="radio" name="stay_long" value="全く思わない" onchange="showFu('fu_stay_long', true)"><span>全く思わない</span></label>
+        </div>
+        <div class="followup-box" id="fu_stay_long">
+          <div class="fu-label">ためらう理由があれば教えてください</div>
+          <div class="fu-note">例：将来のキャリアに不安を感じる、環境を変えたいと思っている など</div>
+          <textarea name="stay_long_detail" rows="3" placeholder="自由にご記入ください"></textarea>
+        </div>
+      </div>
+
+      <div class="question">
+        <div class="q-label">Q12. これまでに退職を考えたことはありますか？<span class="required">必須</span></div>
+        <div class="options">
+          <label class="option-label"><input type="radio" name="turnover_exp" value="よく考える" required><span>よく考える</span></label>
+          <label class="option-label"><input type="radio" name="turnover_exp" value="たまに考える"><span>たまに考える</span></label>
+          <label class="option-label"><input type="radio" name="turnover_exp" value="あまり考えたことはない"><span>あまり考えたことはない</span></label>
+          <label class="option-label"><input type="radio" name="turnover_exp" value="全く考えたことはない"><span>全く考えたことはない</span></label>
+        </div>
+      </div>
+
+      <div class="question">
+        <div class="q-label">Q13. 今後もこの職場で働き続けたい理由、または離職を考える理由を教えてください<span class="optional">任意</span></div>
+        <div class="q-sub">例：働きやすい環境が整っている／業務負担を見直したいと感じている など</div>
+        <textarea name="stay_reason" placeholder="自由にご記入ください"></textarea>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Section 6: ハラスメント・懸念事項 -->
+  <div class="section" style="animation-delay:.3s">
+    <div class="section-header"><div class="section-num">6</div><div class="section-title">ハラスメント・懸念事項</div></div>
+    <div class="section-body">
+
+      <div class="question">
+        <div class="q-label">Q14. ハラスメントや重大な懸念がある場合はご記入ください<span class="optional">任意</span></div>
+        <div class="q-sub">秘匿性のあるアンケートです。安心してお答えください。</div>
+        <textarea name="harassment" placeholder="気になっていることを自由にご記入ください。"></textarea>
+      </div>
+
+      <div class="question">
+        <div class="q-label">Q15（補足）. 職場で気になる言動や、違和感を感じた出来事があれば教えてください<span class="optional">任意</span></div>
+        <div class="q-sub">例：言い方がきついと感じた／冗談でも気になる発言があった など</div>
+        <textarea name="incident" placeholder="自由にご記入ください。"></textarea>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Section 7: 個別相談 -->
+  <div class="section" style="animation-delay:.35s">
+    <div class="section-header"><div class="section-num">7</div><div class="section-title">個別相談</div></div>
+    <div class="section-body">
+
+      <div class="question">
+        <div class="q-label">Q16. 個別相談を希望しますか？<span class="required">必須</span></div>
+        <div class="q-sub">「はい」を選んだ方には、日程調整のご案内をお伝えします。</div>
+        <div class="options">
+          <label class="option-label"><input type="radio" name="consult" value="はい、希望する" required onchange="onConsultChange(this)"><span>はい、希望する</span></label>
+          <label class="option-label"><input type="radio" name="consult" value="いいえ、不要です" onchange="onConsultChange(this)"><span>いいえ、不要です</span></label>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Privacy -->
+  <div class="section" style="animation-delay:.4s">
+    <div class="section-header"><div class="section-num">✓</div><div class="section-title">プライバシーポリシーの確認</div></div>
+    <div class="section-body">
+      <div class="privacy-link-box">
+        📄 回答前に必ず<a href="privacy.html" target="_blank">プライバシーポリシー</a>をご確認ください。回答内容の取り扱い・匿名性の保証・情報管理について記載しています。
+      </div>
+      <label class="privacy-check">
+        <input type="checkbox" id="privacyCheck" required>
+        <span>プライバシーポリシーを読み、内容に同意します</span>
+      </label>
+    </div>
+  </div>
+
+  <!-- Submit -->
+  <div class="submit-area">
+    <button type="button" class="submit-btn" onclick="submitSurvey()">回答を送信する</button>
+    <p style="margin-top:12px;font-size:11px;color:#aaa;">送信後の修正・再回答はできません</p>
+  </div>
+
+  <!-- Thank you -->
+  <div class="thankyou" id="thankYou">
+    <div class="thankyou-icon">✓</div>
+    <h2>ご回答ありがとうございました</h2>
+    <p>
+      皆様の声はより良い組織づくりのために活用されます。<br>
+      回答内容は匿名で集計・分析され、経営層への改善提案に使用されます。<br><br>
+      ご協力いただきありがとうございました。
+    </p>
+  </div>
+
+</div><!-- /formContainer -->
+
+<!-- ===== 個別相談 ポップアップ ===== -->
+<div class="modal-overlay" id="consultModal">
+  <div class="modal">
+    <div class="modal-top">
+      <h3>📅 個別相談のご案内</h3>
+      <p>お気持ちや状況をより詳しくお聞きし、一緒に解決策を考えます。<br>秘密厳守でご対応いたします。</p>
+    </div>
+    <div class="modal-body">
+      <p>電話またはオンラインでの個別相談をご希望される方は、以下のURLから日程の調整をお願いいたします。</p>
+      <div class="modal-cta">
+        <a class="btn-reserve"
+           href="https://timerex.net/s/link.pranity_9271/6ba775f4"
+           target="_blank" rel="noopener">
+          日程を予約する（TimereX）
+          <small>別タブで予約ページが開きます</small>
+        </a>
+        <div class="modal-email">
+          <strong>メールでのご相談</strong><br>
+          件名に「個別相談希望」と記載のうえ、<strong>会社名・相談内容</strong>をお送りください。<br>
+          📧 <strong>info@linkpranity.com</strong><br>
+          <span style="font-size:11px;">お預かりした個人情報は厳重に管理し、外部に開示することは一切ありません。</span>
+        </div>
+      </div>
+      <button class="modal-close-btn" onclick="closeConsultModal()">閉じてアンケートに戻る</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>© 2026 <a href="https://linkpranity.com" target="_blank">LINKPRANITY</a> ｜ <a href="privacy.html" target="_blank">プライバシーポリシー</a></p>
+</footer>
+
+<script>
+/* ─── 開始 ─── */
+function startSurvey() {
+  document.getElementById('introNotice').style.display = 'none';
+  document.getElementById('formContainer').style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* ─── フォローアップ表示：ラジオ ─── */
+function showFu(id, show) {
+  var box = document.getElementById(id);
+  if (!box) return;
+  if (show) box.classList.add('show');
+  else      box.classList.remove('show');
+}
+
+/* ラジオのhide（他の選択肢に変えた時に閉じる）*/
+var radioFuMap = {
+  'dept':          { triggers: ['その他'],                               fuId: 'fu_dept' },
+  'idea':          { triggers: ['あまり活かせていない','全く活かせていない'], fuId: 'fu_idea' },
+  'relations_good':{ triggers: ['あまり良好ではない','良好ではない'],       fuId: 'fu_relations_good' },
+  'relations':     { triggers: ['やや不満','とても不満'],                   fuId: 'fu_relations' },
+  'comm_stress':   { triggers: ['多少ある','とてもある'],                   fuId: 'fu_comm_stress' },
+  'conflict':      { triggers: ['納得はしていないが解決はしている','納得も解決もしていない'], fuId: 'fu_conflict' },
+  'support':       { triggers: ['やや不満','とても不満'],                   fuId: 'fu_support' },
+  'stay_long':     { triggers: ['あまり思わない','全く思わない'],            fuId: 'fu_stay_long' },
+};
+
+document.querySelectorAll('input[type="radio"]').forEach(function(el) {
+  el.addEventListener('change', function() {
+    var map = radioFuMap[el.name];
+    if (!map) return;
+    var box = document.getElementById(map.fuId);
+    if (!box) return;
+    if (map.triggers.includes(el.value)) box.classList.add('show');
+    else box.classList.remove('show');
+  });
+});
+
+/* ─── チェックボックスのフォローアップ ─── */
+function toggleFuCheck(el, fuId) {
+  var box = document.getElementById(fuId);
+  if (!box) return;
+  if (el.checked) box.classList.add('show');
+  else box.classList.remove('show');
+}
+
+/* ─── 個別相談選択 → ポップアップ ─── */
+function onConsultChange(el) {
+  if (el.value === 'はい、希望する') {
+    document.getElementById('consultModal').classList.add('open');
+  }
+}
+
+function closeConsultModal() {
+  document.getElementById('consultModal').classList.remove('open');
+}
+
+/* オーバーレイクリックで閉じる */
+document.getElementById('consultModal').addEventListener('click', function(e) {
+  if (e.target === this) closeConsultModal();
+});
+
+/* ─── 送信 ─── */
+function submitSurvey() {
+  /* 必須ラジオチェック */
+  var reqRadios = ['tenure','dept','idea','relations_good','relations','comm_stress','conflict','support','stay_long','turnover_exp','consult'];
+  for (var i = 0; i < reqRadios.length; i++) {
+    if (!document.querySelector('input[name="' + reqRadios[i] + '"]:checked')) {
+      alert('未回答の必須項目があります。赤い「必須」マークの質問にすべてご回答ください。');
+      return;
+    }
+  }
+
+  /* 必須チェックボックス */
+  if (!document.querySelector('input[name="ikigai"]:checked')) {
+    alert('Q3は必須です。1つ以上選択してください。'); return;
+  }
+  if (!document.querySelector('input[name="improve"]:checked')) {
+    alert('Q10は必須です。1つ以上選択してください。'); return;
+  }
+
+  /* プライバシー */
+  if (!document.getElementById('privacyCheck').checked) {
+    alert('プライバシーポリシーへの同意が必要です。'); return;
+  }
+
+  /* データ収集 */
+  var a = {};
+
+  reqRadios.forEach(function(name) {
+    var el = document.querySelector('input[name="' + name + '"]:checked');
+    if (el) a[name] = el.value;
+  });
+
+  ['ikigai','improve'].forEach(function(name) {
+    var vals = [];
+    document.querySelectorAll('input[name="' + name + '"]:checked').forEach(function(el) { vals.push(el.value); });
+    a[name] = vals;
+  });
+
+  ['dept_other','idea_detail','relations_good_detail','relations_detail',
+   'comm_stress_detail','conflict_detail','support_detail','stay_long_detail',
+   'stay_reason','harassment','incident','ikigai_other','improve_other'].forEach(function(name) {
+    var el = document.querySelector('[name="' + name + '"]');
+    if (el && el.value.trim()) a[name] = el.value.trim();
+  });
+
+  /* 保存 */
+  var all = JSON.parse(localStorage.getItem('surveyResponses') || '[]');
+  all.push({ timestamp: new Date().toISOString(), answers: a });
+  localStorage.setItem('surveyResponses', JSON.stringify(all));
+
+  /* 表示切替 */
+  document.querySelectorAll('.section').forEach(function(s) { s.style.display = 'none'; });
+  document.querySelector('.submit-area').style.display = 'none';
+  var ty = document.getElementById('thankYou');
+  ty.style.display = 'block';
+
+  /* 相談希望なら送信後もポップアップ */
+  if (a['consult'] === 'はい、希望する') {
+    document.getElementById('consultModal').classList.add('open');
+  }
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
