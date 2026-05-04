@@ -31,17 +31,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 .login-error{color:var(--red);font-size:12px;min-height:18px;margin-bottom:12px;text-align:center}
 .login-btn{width:100%;background:linear-gradient(135deg,var(--teal),var(--teal-dark));color:white;border:none;border-radius:8px;padding:14px;font-family:'Noto Sans JP',sans-serif;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:.05em;transition:all .2s;box-shadow:0 4px 14px rgba(13,158,142,.3)}
 .login-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(13,158,142,.4)}
-.divider{text-align:center;font-size:11px;color:#ccc;margin:20px 0 16px;position:relative}
-.divider::before,.divider::after{content:'';position:absolute;top:50%;height:1px;background:var(--border);width:38%}
-.divider::before{left:0}.divider::after{right:0}
-.gen-area{background:var(--teal-light);border:1px solid var(--border);border-radius:8px;padding:14px 16px}
-.gen-area p{font-size:11.5px;color:var(--text-light);margin-bottom:10px}
-.gen-row{display:flex;gap:8px;align-items:center}
-.gen-result{flex:1;padding:9px 12px;border:1.5px solid var(--border);border-radius:6px;font-size:13px;font-family:monospace;background:var(--white);color:var(--teal-dark);font-weight:700;letter-spacing:.1em;min-height:38px;display:flex;align-items:center}
-.gen-btn{padding:9px 14px;background:var(--teal);color:white;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:'Noto Sans JP',sans-serif;transition:background .2s}
-.gen-btn:hover{background:var(--teal-dark)}
-.copy-btn{padding:9px 12px;background:var(--white);border:1.5px solid var(--border);border-radius:6px;font-size:14px;cursor:pointer;transition:all .2s;color:var(--text-light)}
-.copy-btn:hover{background:var(--teal-light);border-color:var(--teal)}
+
 
 /* ===== ADMIN MAIN ===== */
 #adminScreen{display:none}
@@ -167,15 +157,7 @@ tbody td{padding:10px 12px;color:var(--text);white-space:nowrap;vertical-align:m
     <div class="login-error" id="loginError"></div>
     <button class="login-btn" onclick="doLogin()">ログイン</button>
 
-    <div class="divider">パスワードジェネレーター</div>
-    <div class="gen-area">
-      <p>安全なランダムパスワードを生成します（クライアント共有用など）</p>
-      <div class="gen-row">
-        <div class="gen-result" id="genResult">—</div>
-        <button class="gen-btn" onclick="generatePw()">生成</button>
-        <button class="copy-btn" onclick="copyPw()" title="コピー">📋</button>
-      </div>
-    </div>
+  
   </div>
 </div>
 
@@ -314,7 +296,7 @@ async function sha256(s){
   const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));
   return Array.from(new Uint8Array(b)).map(b=>b.toString(16).padStart(2,'0')).join('');
 }
-const ADMIN_HASH='b8c37ee41b5cadf50be3f2cd5de59baa8f2b87c1c43bd9cbc1e81f32b0e143d'; // lp-admin2025
+const ADMIN_HASH='61cb7c1fdf5a395ef165ad6f11b337c6540b3c9f010b39ffc108b9ba69313d02'; // LP-admin@2026
 
 /* ── LOGIN ── */
 async function doLogin(){
@@ -345,19 +327,8 @@ function toggleEye(){
   ico.textContent=inp.type==='password'?'👁️‍🗨️':'🙈';
 }
 
-/* ── PW GENERATOR ── */
-function generatePw(){
-  const c='ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$%';
-  const a=new Uint8Array(12);crypto.getRandomValues(a);
-  document.getElementById('genResult').textContent=Array.from(a).map(b=>c[b%c.length]).join('');
-}
-function copyPw(){
-  const t=document.getElementById('genResult').textContent;
-  if(t==='—')return;
-  navigator.clipboard.writeText(t).then(()=>{
-    const b=event.currentTarget;b.textContent='✅';setTimeout(()=>b.textContent='📋',1500);
-  });
-}
+
+
 
 /* auto-login */
 if(sessionStorage.getItem('lpAuth')==='1'){
