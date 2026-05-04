@@ -291,6 +291,9 @@ tbody td{padding:10px 12px;color:var(--text);white-space:nowrap;vertical-align:m
 </div>
 
 <script>
+/* ── GAS設定 ── */
+var GAS_URL = 'https://script.google.com/macros/s/AKfycbypRlWtKs6EhS6dhJQ7yrJUCQOkSlRi5dwDtD0Fv83_qyJHFcmC5qVq41TxASmLAqHB/exec'; // ← デプロイ後にURLを差し替える
+
 /* ── HASH ── */
 async function sha256(s){
   const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));
@@ -343,13 +346,37 @@ function showTab(id,btn){
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   btn.classList.add('active');
-  if(id==='tabDash')refreshDash();
-  if(id==='tabResp')renderResp();
+  if(id==='tabDash'){fetchFromGAS();}
+  if(id==='tabResp'){fetchFromGAS();}
   if(id==='tabClient')loadClient();
 }
 
 /* ── INIT ── */
-function initAdmin(){loadClient();refreshDash();renderResp();}
+function initAdmin(){loadClient();fetchFromGAS();}
+
+function fetchFromGAS(){
+  fetch(GAS_URL + '?type=responses')
+    .then(function(r){return r.json();})
+    .then(function(data){
+      window._gasResponses = data;
+      refreshDash();
+      renderResp();
+    }).catch(function(){
+      window._gasResponses = [];
+      refreshDash();
+      renderResp();
+    });
+  fetch(GAS_URL + '?type=meta')
+    .then(function(r){return r.json();})
+    .then(function(data){
+      localStorage.setItem('reportMeta', JSON.stringify(data));
+      loadClient();
+    }).catch(function(){});
+}
+
+function getResponses(){
+  return window._gasResponses || [];
+}
 
 /* ── CLIENT ── */
 function saveClient(){
@@ -357,6 +384,12 @@ function saveClient(){
     biz:document.getElementById('cBiz').value,contact:document.getElementById('cContact').value,
     month:document.getElementById('cMonth').value,memo:document.getElementById('cMemo').value};
   localStorage.setItem('reportMeta',JSON.stringify(info));
+  /* GASにも保存 */
+  fetch(GAS_URL, {
+    method:'POST', mode:'no-cors',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({type:'meta', data:info})
+  });
   const m=document.getElementById('saveMsg');m.style.display='block';
   setTimeout(()=>m.style.display='none',2000);
   refreshDash();
@@ -373,7 +406,7 @@ function loadClient(){
 
 /* ── DASHBOARD ── */
 function refreshDash(){
-  const rs=JSON.parse(localStorage.getItem('surveyResponses')||'[]');
+  const rs=getResponses();
   const meta=JSON.parse(localStorage.getItem('reportMeta')||'{}');
   const total=rs.length;
   const target=parseInt(meta.emp)||0;
@@ -506,7 +539,7 @@ const QLABELS={
 const FREE_KEYS=['idea_detail','relations_good_detail','relations_detail','comm_stress_detail','conflict_detail','support_detail','stay_long_detail','stay_reason','harassment','incident','ikigai_other','improve_other'];
 
 function renderResp(){
-  const rs=JSON.parse(localStorage.getItem('surveyResponses')||'[]');
+  const rs=getResponses();
   document.getElementById('respCount').textContent='計'+rs.length+'件';
   const wrap=document.getElementById('respTable');
   if(!rs.length){wrap.innerHTML='<div class="empty-state" style="padding:40px"><div class="icon">📭</div><p>まだ回答データがありません。</p></div>';return;}
@@ -545,7 +578,7 @@ function renderResp(){
 }
 
 function showDetail(idx){
-  const rs=JSON.parse(localStorage.getItem('surveyResponses')||'[]');
+  const rs=getResponses();
   const r=rs[idx];if(!r)return;
   const dt=new Date(r.timestamp);
   document.getElementById('modalTitle').textContent='回答 #'+(idx+1)+' — '+dt.toLocaleDateString('ja-JP');
@@ -567,16 +600,10 @@ function closeModal(){document.getElementById('detailModal').classList.remove('o
 document.getElementById('detailModal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal();});
 
 function deleteResp(idx){
-  if(!confirm('回答 #'+(idx+1)+' を削除しますか？この操作は取り消せません。'))return;
-  const rs=JSON.parse(localStorage.getItem('surveyResponses')||'[]');
-  rs.splice(idx,1);
-  localStorage.setItem('surveyResponses',JSON.stringify(rs));
-  renderResp();refreshDash();
+  alert('GASモードでは個別削除はスプレッドシートから直接行ってください。');
 }
 function clearAll(){
-  if(!confirm('全ての回答データを削除しますか？取り消せません。'))return;
-  localStorage.removeItem('surveyResponses');
-  renderResp();refreshDash();
+  alert('GASモードでは全削除はスプレッドシートから直接行ってください。');
 }
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 </script>

@@ -215,6 +215,9 @@ header h1{font-size:15px;font-weight:700;letter-spacing:.05em}
 </div>
 
 <script>
+/* ── GAS設定 ── */
+var GAS_URL = 'https://script.google.com/macros/s/AKfycbypRlWtKs6EhS6dhJQ7yrJUCQOkSlRi5dwDtD0Fv83_qyJHFcmC5qVq41TxASmLAqHB/exec'; // ← デプロイ後にURLを差し替える
+
 /* ── API Key ── */
 function saveApiKey(){
   const v=document.getElementById('apiKeyInput').value.trim();
@@ -239,7 +242,7 @@ function loadClientDisplay(){
 }
 
 function loadDataStats(){
-  const rs=JSON.parse(localStorage.getItem('surveyResponses')||'[]');
+  const rs=window._gasResponses||[];
   document.getElementById('dsTotal').textContent=rs.length;
   document.getElementById('dsConsult').textContent=rs.filter(r=>r.answers?.consult==='はい、希望する').length;
   document.getElementById('dsTurnover').textContent=rs.filter(r=>['よく考える','たまに考える'].includes(r.answers?.turnover_exp)).length;
@@ -373,7 +376,7 @@ async function generateReport(){
   const apiKey=sessionStorage.getItem('lpApiKey');
   if(!apiKey){alert('APIキーを設定してください。');return}
 
-  const rs=JSON.parse(localStorage.getItem('surveyResponses')||'[]');
+  const rs=window._gasResponses||[];
   if(!rs.length){alert('回答データがありません。先にアンケートを実施してください。');return}
 
   const meta=JSON.parse(localStorage.getItem('reportMeta')||'{}');
@@ -487,8 +490,24 @@ function regenerate(){
 
 /* ── Init ── */
 loadApiKeyStatus();
-loadClientDisplay();
-loadDataStats();
+/* GASからデータ取得してから表示 */
+fetch(GAS_URL + '?type=responses')
+  .then(function(r){return r.json();})
+  .then(function(data){
+    window._gasResponses = data;
+    loadDataStats();
+  }).catch(function(){
+    window._gasResponses = [];
+    loadDataStats();
+  });
+fetch(GAS_URL + '?type=meta')
+  .then(function(r){return r.json();})
+  .then(function(data){
+    localStorage.setItem('reportMeta', JSON.stringify(data));
+    loadClientDisplay();
+  }).catch(function(){
+    loadClientDisplay();
+  });
 </script>
 </body>
 </html>

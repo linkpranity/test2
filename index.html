@@ -829,23 +829,32 @@ function submitSurvey() {
     if (el && el.value.trim()) a[name] = el.value.trim();
   });
 
-  /* 保存 */
-  var all = JSON.parse(localStorage.getItem('surveyResponses') || '[]');
-  all.push({ timestamp: new Date().toISOString(), answers: a });
-  localStorage.setItem('surveyResponses', JSON.stringify(all));
+  /* GASへ送信 */
+  var GAS_URL = 'https://script.google.com/macros/s/AKfycbypRlWtKs6EhS6dhJQ7yrJUCQOkSlRi5dwDtD0Fv83_qyJHFcmC5qVq41TxASmLAqHB/exec';
+  var submitBtn = document.querySelector('.submit-btn');
+  submitBtn.disabled = true;
+  submitBtn.textContent = '送信中...';
 
-  /* 表示切替 */
-  document.querySelectorAll('.section').forEach(function(s) { s.style.display = 'none'; });
-  document.querySelector('.submit-area').style.display = 'none';
-  var ty = document.getElementById('thankYou');
-  ty.style.display = 'block';
-
-  /* 相談希望なら送信後もポップアップ */
-  if (a['consult'] === 'はい、希望する') {
-    document.getElementById('consultModal').classList.add('open');
+  function showThanks() {
+    document.querySelectorAll('.section').forEach(function(s) { s.style.display = 'none'; });
+    document.querySelector('.submit-area').style.display = 'none';
+    document.getElementById('thankYou').style.display = 'block';
+    if (a['consult'] === 'はい、希望する') {
+      document.getElementById('consultModal').classList.add('open');
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  fetch(GAS_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ type: 'response', answers: a })
+  }).then(function() {
+    showThanks();
+  }).catch(function() {
+    showThanks();
+  });
 }
 </script>
 </body>
