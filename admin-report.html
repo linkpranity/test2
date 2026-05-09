@@ -216,7 +216,7 @@ header h1{font-size:15px;font-weight:700;letter-spacing:.05em}
 
 <script>
 /* ── GAS設定 ── */
-var GAS_URL = 'https://script.google.com/macros/s/AKfycbypRlWtKs6EhS6dhJQ7yrJUCQOkSlRi5dwDtD0Fv83_qyJHFcmC5qVq41TxASmLAqHB/exec'; // ← デプロイ後にURLを差し替える
+var GAS_URL = 'https://script.google.com/macros/s/AKfycbypRlWtKs6EhS6dhJQ7yrJUCQOkSlRi5dwDtD0Fv83_qyJHFcmC5qVq41TxASmLAqHB/exec';
 
 /* ── API Key ── */
 function saveApiKey(){
@@ -255,7 +255,6 @@ function loadDataStats(){
 function buildPrompt(rs, meta){
   const total=rs.length;
 
-  /* 各設問の集計 */
   function countRadio(key){
     const c={};rs.forEach(r=>{const v=r.answers?.[key];if(v)c[v]=(c[v]||0)+1;});return c;
   }
@@ -422,7 +421,6 @@ function renderReport(md, meta, total){
   const now=new Date();
   const dateStr=now.toLocaleDateString('ja-JP',{year:'numeric',month:'long',day:'numeric'});
 
-  /* Markdown → HTML 簡易変換 */
   let html=`<h1>離職率改善レポート</h1>
 <div class="report-sub">
   クライアント：${meta.name||'—'} ／ 実施月：${meta.month||'—'} ／ 有効回答数：${total}名 ／ 作成日：${dateStr}<br>
@@ -453,7 +451,6 @@ function mdToHtml(md){
     .replace(/^⚠️ (.+)$/gm,'<div class="alert-box">⚠️ $1</div>')
     .replace(/^🚨 (.+)$/gm,'<div class="danger-box">🚨 $1</div>');
 
-  /* リスト処理 */
   const lines=html.split('\n');
   const out=[];
   let inUl=false,inOl=false;
@@ -490,7 +487,6 @@ function regenerate(){
 
 /* ── Init ── */
 loadApiKeyStatus();
-/* GASからデータ取得してから表示 */
 fetch(GAS_URL + '?type=responses')
   .then(function(r){return r.json();})
   .then(function(data){
