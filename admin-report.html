@@ -208,13 +208,13 @@ footer{background:var(--teal-deep);color:rgba(255,255,255,.8);text-align:center;
       </div>
       <div class="score-card">
         <div class="score-num" id="scoreEvaluation" style="color:var(--teal)">—</div>
-        <div class="score-lbl">評価制度</div>
+        <div class="score-lbl">支援体制</div>
         <div id="scoreEvaluationBadge"></div>
         <div class="score-bar-bg"><div class="score-bar-fill" id="scoreEvaluationBar" style="width:0%"></div></div>
       </div>
       <div class="score-card">
         <div class="score-num" id="scoreWorkload" style="color:var(--teal)">—</div>
-        <div class="score-lbl">業務量</div>
+        <div class="score-lbl">コミュニケーション</div>
         <div id="scoreWorkloadBadge"></div>
         <div class="score-bar-bg"><div class="score-bar-fill" id="scoreWorkloadBar" style="width:0%"></div></div>
       </div>
@@ -226,7 +226,7 @@ footer{background:var(--teal-deep);color:rgba(255,255,255,.8);text-align:center;
       </div>
       <div class="score-card">
         <div class="score-num" id="scoreSpeak" style="color:var(--teal)">—</div>
-        <div class="score-lbl">発言しやすさ</div>
+        <div class="score-lbl">意見活用度</div>
         <div id="scoreSpeakBadge"></div>
         <div class="score-bar-bg"><div class="score-bar-fill" id="scoreSpeakBar" style="width:0%"></div></div>
       </div>
@@ -237,8 +237,8 @@ footer{background:var(--teal-deep);color:rgba(255,255,255,.8);text-align:center;
     <div class="section-title">📋 各項目 回答分布</div>
     <div class="dist-grid">
       <div class="dist-card"><h4>Q3 人間関係の満足度</h4><div id="distRelations"></div></div>
-      <div class="dist-card"><h4>Q4 評価制度への納得感</h4><div id="distEvaluation"></div></div>
-      <div class="dist-card"><h4>Q5 業務量の適正感</h4><div id="distWorkload"></div></div>
+      <div class="dist-card"><h4>Q9 支援体制への満足度</h4><div id="distEvaluation"></div></div>
+      <div class="dist-card"><h4>Q7 コミュニケーションストレス</h4><div id="distWorkload"></div></div>
       <div class="dist-card"><h4>Q6 継続就業意向</h4><div id="distStay"></div></div>
     </div>
   </div>
@@ -270,9 +270,9 @@ footer{background:var(--teal-deep);color:rgba(255,255,255,.8);text-align:center;
             <circle cx="50" cy="50" r="38" fill="none" stroke="#FEF3C7" stroke-width="14"/>
             <circle id="arcSpeakFill" cx="50" cy="50" r="38" fill="none" stroke="#D97706" stroke-width="14" stroke-dasharray="0 239" stroke-linecap="round" transform="rotate(-90 50 50)"/>
             <text x="50" y="46" text-anchor="middle" font-size="14" font-weight="700" fill="#D97706" id="arcSpeakTxt">0%</text>
-            <text x="50" y="60" text-anchor="middle" font-size="8" fill="#888">言いづらさ</text>
+            <text x="50" y="60" text-anchor="middle" font-size="8" fill="#888">意見困難</text>
           </svg>
-          <p>言いづらさあり</p>
+          <p>意見活用困難</p>
         </div>
       </div>
       <div class="concern-list">
@@ -355,16 +355,16 @@ footer{background:var(--teal-deep);color:rgba(255,255,255,.8);text-align:center;
 <script>
 /* FALLBACK DATA */
 const FALLBACK=[
-  {answers:{tenure:"1〜3年",role:"一般社員",relations:"満足している",evaluation:"どちらともいえない",workload:"やや不満",stay:"そう思う",speak_up:"少しある",concerns:["評価・給与への不満","業務量・残業過多"],comments:"もう少し評価の透明性が欲しい",harassment:"",incident:""}},
-  {answers:{tenure:"3〜5年",role:"リーダー・主任",relations:"とても満足している",evaluation:"満足している",workload:"満足している",stay:"とてもそう思う",speak_up:"ない",concerns:["職場の人間関係"],comments:"チームワークは良好だと思います",harassment:"",incident:""}},
-  {answers:{tenure:"1年未満",role:"一般社員",relations:"やや不満",evaluation:"不満",workload:"不満",stay:"あまり思わない",speak_up:"ある",concerns:["評価・給与への不満","キャリアパスが不明確","業務量・残業過多"],comments:"",harassment:"上司から怒鳴られることがある",incident:""}},
-  {answers:{tenure:"5〜10年",role:"管理職",relations:"満足している",evaluation:"満足している",workload:"どちらともいえない",stay:"そう思う",speak_up:"ない",concerns:["職場環境（設備・衛生）"],comments:"全体的には良い職場だと思う",harassment:"",incident:""}},
-  {answers:{tenure:"3〜5年",role:"一般社員",relations:"どちらともいえない",evaluation:"どちらともいえない",workload:"やや不満",stay:"あまり思わない",speak_up:"ある",concerns:["評価・給与への不満","キャリアパスが不明確"],comments:"将来のキャリアが見えない",harassment:"",incident:"同僚が上司に無視されているように見える"}},
-  {answers:{tenure:"1〜3年",role:"一般社員",relations:"やや不満",evaluation:"不満",workload:"不満",stay:"全く思わない",speak_up:"ある",concerns:["業務量・残業過多","精神的なストレス"],comments:"",harassment:"",incident:""}}
+  {answers:{tenure:"1〜3年",dept:"一般社員",relations:"やや満足している",support:"どちらでもない",comm_stress:"多少ある",idea:"やや活かせていない",stay_long:"やや思う",improve:["評価制度","業務量"],comments:"もう少し評価の透明性が欲しい",harassment:"",incident:""}},
+  {answers:{tenure:"3〜5年",dept:"リーダー・主任",relations:"とても満足している",support:"とても満足している",comm_stress:"まったくない",idea:"よく活かせている",stay_long:"とても思う",improve:[],comments:"チームワークは良好だと思います",harassment:"",incident:""}},
+  {answers:{tenure:"1年未満",dept:"一般社員",relations:"やや不満",support:"やや不満",comm_stress:"とてもある",idea:"全く活かせていない",stay_long:"あまり思わない",improve:["評価制度","給与・待遇","業務量"],comments:"",harassment:"上司から怒鳴られることがある",incident:""}},
+  {answers:{tenure:"5〜10年",dept:"管理職",relations:"やや満足している",support:"やや満足している",comm_stress:"ほとんどない",idea:"やや活かせている",stay_long:"やや思う",improve:[],comments:"全体的には良い職場だと思う",harassment:"",incident:""}},
+  {answers:{tenure:"3〜5年",dept:"一般社員",relations:"どちらでもない",support:"どちらでもない",comm_stress:"多少ある",idea:"あまり活かせていない",stay_long:"あまり思わない",improve:["評価制度","給与・待遇"],comments:"将来のキャリアが見えない",harassment:"",incident:"同僚が上司に無視されているように見える"}},
+  {answers:{tenure:"1〜3年",dept:"一般社員",relations:"やや不満",support:"やや不満",comm_stress:"とてもある",idea:"全く活かせていない",stay_long:"全く思わない",improve:["業務量","精神的なストレス"],comments:"",harassment:"",incident:""}}
 ];
 
-const SAT5={"とても満足している":100,"満足している":75,"どちらともいえない":50,"やや不満":25,"不満":0,"とても不満":0};
-const STAY4={"とてもそう思う":100,"そう思う":75,"あまり思わない":25,"全く思わない":0};
+const SAT5={"とても満足している":100,"やや満足している":75,"どちらでもない":50,"やや不満":25,"とても不満":0};
+const STAY4={"とても思う":100,"やや思う":75,"あまり思わない":25,"全く思わない":0};
 const SPEAK={"ない":100,"少しある":50,"ある":0};
 
 function calcScore(rs,key,map){
@@ -412,7 +412,7 @@ function render(){
   const rs=raw.length?raw:FALLBACK;
 
   const harassCount=rs.filter(r=>(r.answers?.harassment||'').trim()||(r.answers?.incident||'').trim()).length;
-  const resignCount=rs.filter(r=>['あまり思わない','全く思わない'].includes(r.answers?.stay)).length;
+  const resignCount=rs.filter(r=>['あまり思わない','全く思わない'].includes(r.answers?.stay_long)).length;
   document.getElementById('kpi-total').textContent=rs.length;
   document.getElementById('kpi-harassment').textContent=harassCount;
   document.getElementById('kpi-resign').textContent=resignCount;
@@ -420,10 +420,10 @@ function render(){
 
   const scores={
     Relations:calcScore(rs,'relations',SAT5),
-    Evaluation:calcScore(rs,'evaluation',SAT5),
-    Workload:calcScore(rs,'workload',SAT5),
-    Stay:calcScore(rs,'stay',STAY4),
-    Speak:calcScore(rs,'speak_up',SPEAK)
+    Evaluation:calcScore(rs,'support',SAT5),
+    Workload:calcScore(rs,'comm_stress',{'まったくない':100,'ほとんどない':75,'多少ある':25,'とてもある':0}),
+    Stay:calcScore(rs,'stay_long',STAY4),
+    Speak:calcScore(rs,'idea',{'よく活かせている':100,'やや活かせている':75,'あまり活かせていない':25,'全く活かせていない':0})
   };
   Object.entries(scores).forEach(([k,s])=>{
     const el=document.getElementById('score'+k);
@@ -435,22 +435,22 @@ function render(){
     }
   });
 
-  const SAT5_OPTS=["とても満足している","満足している","どちらともいえない","やや不満","不満"];
-  const STAY_OPTS=["とてもそう思う","そう思う","あまり思わない","全く思わない"];
+  const SAT5_OPTS=["とても満足している","やや満足している","どちらでもない","やや不満","とても不満"];
+  const STAY_OPTS=["とても思う","やや思う","あまり思わない","全く思わない"];
   renderDist('distRelations',rs,'relations',SAT5_OPTS);
-  renderDist('distEvaluation',rs,'evaluation',SAT5_OPTS);
-  renderDist('distWorkload',rs,'workload',SAT5_OPTS);
-  renderDist('distStay',rs,'stay',STAY_OPTS);
+  renderDist('distEvaluation',rs,'support',SAT5_OPTS);
+  renderDist('distWorkload',rs,'comm_stress',['まったくない','ほとんどない','多少ある','とてもある']);
+  renderDist('distStay',rs,'stay_long',STAY_OPTS);
 
   const total=rs.length||1;
   setArc('arcResignFill','arcResignTxt',Math.round(resignCount/total*100));
   setArc('arcHarassFill','arcHarassTxt',Math.round(harassCount/total*100));
-  const speakCount=rs.filter(r=>['ある','少しある'].includes(r.answers?.speak_up)).length;
+  const speakCount=rs.filter(r=>['あまり活かせていない','全く活かせていない'].includes(r.answers?.idea)).length;
   setArc('arcSpeakFill','arcSpeakTxt',Math.round(speakCount/total*100));
 
   const cCount={};
   rs.forEach(r=>{
-    const c=r.answers?.concerns;
+    const c=r.answers?.improve;
     if(Array.isArray(c))c.forEach(i=>{cCount[i]=(cCount[i]||0)+1;});
     else if(c)cCount[c]=(cCount[c]||0)+1;
   });
@@ -466,15 +466,15 @@ function render(){
   const tenureKeys=[...tenureOrder.filter(k=>tenureGroups[k]),...Object.keys(tenureGroups).filter(k=>!tenureOrder.includes(k))];
   document.getElementById('tenureTableBody').innerHTML=tenureKeys.map(k=>{
     const g=tenureGroups[k]||[];
-    const sr=calcScore(g,'relations',SAT5),ss=calcScore(g,'stay',STAY4);
+    const sr=calcScore(g,'relations',SAT5),ss=calcScore(g,'stay_long',STAY4);
     const avg=sr!==null&&ss!==null?Math.round((sr+ss)/2):null;
     return '<tr><td>'+escHtml(k)+'</td><td>'+g.length+'</td><td>'+(sr??'—')+'</td><td>'+(ss??'—')+'</td><td>'+tagHtml(avg)+'</td></tr>';
   }).join('');
 
   const roleGroups={};
-  rs.forEach(r=>{const rl=r.answers?.role||'不明';if(!roleGroups[rl])roleGroups[rl]=[];roleGroups[rl].push(r);});
+  rs.forEach(r=>{const rl=r.answers?.dept||'不明';if(!roleGroups[rl])roleGroups[rl]=[];roleGroups[rl].push(r);});
   document.getElementById('roleTableBody').innerHTML=Object.entries(roleGroups).map(([k,g])=>{
-    const sr=calcScore(g,'relations',SAT5),ss=calcScore(g,'stay',STAY4);
+    const sr=calcScore(g,'relations',SAT5),ss=calcScore(g,'stay_long',STAY4);
     const avg=sr!==null&&ss!==null?Math.round((sr+ss)/2):null;
     return '<tr><td>'+escHtml(k)+'</td><td>'+g.length+'</td><td>'+(sr??'—')+'</td><td>'+(ss??'—')+'</td><td>'+tagHtml(avg)+'</td></tr>';
   }).join('');
@@ -507,7 +507,7 @@ function renderBar(rs,tenureKeys,tenureGroups){
   barInst=new Chart(ctx,{type:'bar',data:{labels,datasets:[
     {label:'人間関係',data:labels.map(k=>calcScore(tenureGroups[k]||[],'relations',SAT5)??0),backgroundColor:'#DC2626'},
     {label:'評価制度',data:labels.map(k=>calcScore(tenureGroups[k]||[],'evaluation',SAT5)??0),backgroundColor:'#D97706'},
-    {label:'継続就業',data:labels.map(k=>calcScore(tenureGroups[k]||[],'stay',STAY4)??0),backgroundColor:'#0D9E8E'}
+    {label:'継続就業',data:labels.map(k=>calcScore(tenureGroups[k]||[],'stay_long',STAY4)??0),backgroundColor:'#0D9E8E'}
   ]},options:{scales:{y:{min:0,max:100,ticks:{stepSize:25}}},plugins:{legend:{labels:{font:{size:10}}}}}});
 }
 function renderBubble(tenureKeys,tenureGroups,total){
@@ -515,7 +515,7 @@ function renderBubble(tenureKeys,tenureGroups,total){
   if(bubbleInst)bubbleInst.destroy();
   const datasets=tenureKeys.slice(0,6).map((k,i)=>{
     const g=tenureGroups[k]||[];
-    const riskScore=100-(calcScore(g,'stay',STAY4)??50);
+    const riskScore=100-(calcScore(g,'stay_long',STAY4)??50);
     const rate=Math.round(g.length/total*100);
     return {label:k,data:[{x:riskScore,y:rate,r:Math.max(g.length*7,5)}],backgroundColor:'hsla('+(i*60)+',60%,50%,0.6)'};
   });
@@ -567,7 +567,7 @@ async function startAnalysis(apiKey){
   else if(/IT|システム|ソフト|web|エンジニア/.test(biz))industryHint='IT業界は優秀層の流出とバーンアウトが深刻で、リモートワーク格差や評価の透明性確保が急務です。';
 
   const total=rs.length||1;
-  const resignCnt=rs.filter(r=>['あまり思わない','全く思わない'].includes(r.answers?.stay)).length;
+  const resignCnt=rs.filter(r=>['あまり思わない','全く思わない'].includes(r.answers?.stay_long)).length;
   const harassCnt=rs.filter(r=>(r.answers?.harassment||'').trim()||(r.answers?.incident||'').trim()).length;
   const speakCnt=rs.filter(r=>['ある','少しある'].includes(r.answers?.speak_up)).length;
   function avg(key,map){const v=rs.map(r=>map[r.answers?.[key]]).filter(v=>v!==undefined);return v.length?Math.round(v.reduce((a,b)=>a+b,0)/v.length):0;}
@@ -576,8 +576,8 @@ async function startAnalysis(apiKey){
 以下の従業員アンケートデータを分析し、指定のJSON形式のみで回答してください。コードフェンス・HTMLタグ・前置き一切不要。JSONのみ出力。
 
 クライアント:${meta.companyName||'未設定'} 従業員数:${meta.employeeCount||'未設定'}名 事業内容:${meta.business||'未設定'}
-総回答:${total}名 人間関係:${avg('relations',SAT5)}点 評価制度:${avg('evaluation',SAT5)}点 業務量:${avg('workload',SAT5)}点 継続就業:${avg('stay',STAY4)}点
-離職検討:${resignCnt}名(${Math.round(resignCnt/total*100)}%) ハラスメント:${harassCnt}件 言いづらさ:${speakCnt}名(${Math.round(speakCnt/total*100)}%)
+総回答:${total}名 人間関係:${avg('relations',SAT5)}点 評価制度:${avg('evaluation',SAT5)}点 業務量:${avg('workload',SAT5)}点 継続就業:${avg('stay_long',STAY4)}点
+離職検討:${resignCnt}名(${Math.round(resignCnt/total*100)}%) ハラスメント:${harassCnt}件 意見活用困難:${speakCnt}名(${Math.round(speakCnt/total*100)}%)
 業界背景:${industryHint}
 ハラスメント記述:${rs.map(r=>(r.answers?.harassment||'')+(r.answers?.incident||'')).filter(v=>v.trim()).join(' / ')||'なし'}
 
