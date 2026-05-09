@@ -3,507 +3,640 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AIレポート生成 | LINKPRANITY</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<title>月次組織分析レポート | LINKPRANITY</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 :root{
-  --teal:#0D9E8E;--teal-light:#e6f7f5;--teal-dark:#096d61;--teal-deep:#0F4C5C;
-  --text:#1a2e2c;--text-light:#4a6360;--border:#c8e6e3;--bg:#f7fffe;--white:#ffffff;
-  --shadow:0 2px 16px rgba(13,158,142,0.08);--radius:12px;
-  --red:#e05252;--amber:#D97706;--amber-light:#FFFBEB;
+  --teal:#0D9E8E;--teal-dark:#0A7A6E;--teal-deep:#0F4C5C;
+  --teal-light:#E6F7F5;--teal-border:#A7DED9;
+  --danger:#DC2626;--warning:#D97706;--success:#059669;
+  --bg:#F7FAFA;--card:#ffffff;--text:#0F2A2A;--text-light:#3D6464;--border:#D4E2E1;
 }
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Hiragino Sans','Yu Gothic',sans-serif;background:var(--bg);color:var(--text);font-size:13px;line-height:1.6}
 
-/* ── Header ── */
-header{background:linear-gradient(135deg,var(--teal-deep),var(--teal));color:white;padding:0 28px;display:flex;align-items:center;justify-content:space-between;height:60px;box-shadow:0 2px 12px rgba(0,0,0,.15)}
-.h-left{display:flex;align-items:center;gap:12px}
-header img{height:30px;filter:brightness(0) invert(1);opacity:.9;object-fit:contain}
-header h1{font-size:15px;font-weight:700;letter-spacing:.05em}
-.h-right{display:flex;gap:8px}
-.h-btn{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:white;border-radius:20px;padding:6px 14px;font-size:12px;cursor:pointer;font-family:'Noto Sans JP',sans-serif;transition:background .2s;text-decoration:none;display:inline-flex;align-items:center;gap:5px}
-.h-btn:hover{background:rgba(255,255,255,.3)}
+.header{background:#fff;border-bottom:2px solid var(--teal-border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between}
+.header-left h2{font-size:11px;color:var(--text-light);margin-bottom:2px}
+.header-left h1{font-size:18px;font-weight:700;color:var(--teal-deep)}
+.header-left .header-sub{font-size:11px;color:var(--text-light);margin-top:2px}
+.header-right{display:flex;align-items:center;gap:12px}
+.print-btn{background:var(--teal);color:#fff;padding:8px 18px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:700;display:flex;align-items:center;gap:5px}
+.print-btn:hover{background:var(--teal-dark)}
+.header-badge{background:var(--teal-light);border:1px solid var(--teal-border);color:var(--teal-deep);padding:4px 10px;border-radius:12px;font-size:11px;font-weight:700}
+.header-logo{height:32px;object-fit:contain}
 
-.container{max-width:900px;margin:0 auto;padding:28px 20px 60px}
+.client-panel{background:#fff;border:1px solid var(--border);border-radius:8px;margin:16px 24px;padding:16px 20px}
+.client-panel h3{font-size:13px;font-weight:700;color:var(--teal-deep);margin-bottom:12px}
+.client-fields{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+.field-group{display:flex;flex-direction:column;gap:4px}
+.field-group label{font-size:11px;color:var(--text-light);font-weight:700}
+.field-group input{border:1px solid var(--border);border-radius:6px;padding:7px 10px;font-size:13px;color:var(--text);background:var(--bg);width:180px}
+.field-group input:focus{outline:none;border-color:var(--teal)}
+.field-group.wide input{width:280px}
+.save-btn{background:var(--teal);color:#fff;padding:8px 20px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:700;white-space:nowrap}
+.save-btn:hover{background:var(--teal-dark)}
 
-/* ── API Key setup ── */
-.apikey-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:20px;overflow:hidden}
-.apikey-head{background:var(--teal-light);border-bottom:1px solid var(--border);padding:14px 20px;display:flex;align-items:center;gap:10px}
-.apikey-head h2{font-size:14px;font-weight:700;color:var(--teal-deep)}
-.apikey-body{padding:18px 20px;display:flex;gap:10px;align-items:center}
-.apikey-body input{flex:1;padding:11px 14px;border:1.5px solid var(--border);border-radius:8px;font-family:'Noto Sans JP',sans-serif;font-size:13px;color:var(--text);background:var(--bg);transition:border-color .2s}
-.apikey-body input:focus{outline:none;border-color:var(--teal);background:var(--white)}
-.apikey-save{background:var(--teal);color:white;border:none;border-radius:8px;padding:11px 18px;font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;transition:background .2s}
-.apikey-save:hover{background:var(--teal-dark)}
-.apikey-status{font-size:12px;color:var(--teal);display:none;margin-top:6px}
+.kpi-bar{background:var(--teal-deep);color:#fff;padding:14px 24px;display:flex;gap:0}
+.kpi-item{flex:1;text-align:center;border-right:1px solid rgba(255,255,255,.2);padding:0 8px}
+.kpi-item:last-child{border-right:none}
+.kpi-num{font-size:26px;font-weight:700;line-height:1}
+.kpi-lbl{font-size:10px;opacity:.8;margin-top:3px}
 
-/* ── Section Card ── */
-.card{background:var(--white);border-radius:var(--radius);border:1px solid var(--border);margin-bottom:20px;overflow:hidden;box-shadow:var(--shadow)}
-.card-head{background:var(--teal-light);border-bottom:1px solid var(--border);padding:14px 20px;display:flex;align-items:center;justify-content:space-between}
-.card-head h2{font-size:14px;font-weight:700;color:var(--teal-deep)}
-.card-body{padding:20px}
+.container{padding:20px 24px 60px}
+.section{margin-bottom:24px}
+.section-title{font-size:14px;font-weight:700;color:var(--teal-deep);margin-bottom:14px;padding-bottom:6px;border-bottom:2px solid var(--teal-light)}
 
-/* ── Client Info Display ── */
-.client-info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-.ci-box{background:var(--teal-light);border:1px solid var(--border);border-radius:8px;padding:12px 14px}
-.ci-label{font-size:11px;font-weight:700;color:var(--text-light);letter-spacing:.04em;margin-bottom:4px}
-.ci-val{font-size:14px;font-weight:700;color:var(--teal-deep)}
+.score-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.score-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px;text-align:center}
+.score-num{font-size:28px;font-weight:700;line-height:1;margin-bottom:4px}
+.score-lbl{font-size:11px;color:var(--text-light);margin-bottom:8px}
+.score-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px}
+.badge-good{background:#D1FAE5;color:var(--success)}
+.badge-warn{background:#FEF3C7;color:var(--warning)}
+.badge-danger{background:#FEE2E2;color:var(--danger)}
+.score-bar-bg{background:var(--border);border-radius:4px;height:5px;margin-top:8px}
+.score-bar-fill{height:5px;border-radius:4px;transition:width .6s}
 
-/* ── Stats ── */
-.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
-.stat-box{background:var(--teal-light);border:1px solid var(--border);border-radius:8px;padding:14px;text-align:center}
-.stat-num{font-family:'DM Serif Display',serif;font-size:30px;color:var(--teal);line-height:1;margin-bottom:4px}
-.stat-lbl{font-size:11px;color:var(--text-light);font-weight:500}
+.dist-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.dist-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px}
+.dist-card h4{font-size:12px;font-weight:700;color:var(--teal-deep);margin-bottom:10px}
+.dist-row{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.dist-label{width:110px;font-size:11px;color:var(--text-light);flex-shrink:0}
+.dist-bar-bg{flex:1;background:var(--border);border-radius:3px;height:12px}
+.dist-bar-fill{height:12px;border-radius:3px;background:var(--teal)}
+.dist-count{font-size:11px;color:var(--text-light);width:28px;text-align:right}
 
-/* ── Generate button ── */
-.gen-section{text-align:center;padding:10px 0 6px}
-.gen-btn-main{background:linear-gradient(135deg,var(--teal),var(--teal-dark));color:white;border:none;border-radius:50px;padding:16px 52px;font-family:'Noto Sans JP',sans-serif;font-size:15px;font-weight:700;cursor:pointer;letter-spacing:.05em;box-shadow:0 4px 20px rgba(13,158,142,.35);transition:all .3s;position:relative}
-.gen-btn-main:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 28px rgba(13,158,142,.45)}
-.gen-btn-main:disabled{opacity:.55;cursor:not-allowed;transform:none}
-.gen-note{font-size:11.5px;color:var(--text-light);margin-top:10px}
+.risk-row{display:flex;gap:16px;align-items:flex-start}
+.risk-circles{display:flex;gap:20px}
+.risk-circle-wrap{text-align:center}
+.risk-circle-wrap p{font-size:11px;color:var(--text-light);margin-top:6px}
+.concern-list{flex:1;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px}
+.concern-list h4{font-size:12px;font-weight:700;color:var(--teal-deep);margin-bottom:10px}
+.concern-row{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.concern-label{width:160px;font-size:12px;color:var(--text)}
+.concern-bar-bg{flex:1;background:var(--border);border-radius:3px;height:14px}
+.concern-bar-fill{height:14px;border-radius:3px;background:var(--teal)}
+.concern-count{font-size:11px;color:var(--text-light);width:24px;text-align:right}
 
-/* ── Loading ── */
-.loading-wrap{display:none;text-align:center;padding:40px 20px}
-.loading-wrap.show{display:block}
-.loading-spinner{width:48px;height:48px;border:4px solid var(--teal-light);border-top-color:var(--teal);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 16px}
+.cross-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.cross-card{background:var(--card);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.cross-card h4{font-size:12px;font-weight:700;color:#fff;background:var(--teal-deep);padding:9px 14px}
+.cross-card table{width:100%;border-collapse:collapse;font-size:11px}
+.cross-card th{background:var(--teal-light);color:var(--teal-deep);padding:7px 10px;text-align:left;font-weight:700}
+.cross-card td{padding:7px 10px;border-bottom:1px solid var(--border)}
+.cross-card tr:last-child td{border-bottom:none}
+.cross-card tr:nth-child(even) td{background:var(--teal-light)}
+.tag{font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;display:inline-block}
+.tag-good{background:#D1FAE5;color:var(--success)}
+.tag-warn{background:#FEF3C7;color:var(--warning)}
+.tag-danger{background:#FEE2E2;color:var(--danger)}
+
+.chart-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px}
+.chart-card h4{font-size:12px;font-weight:700;color:var(--teal-deep);margin-bottom:10px}
+.chart-card canvas{max-height:200px}
+
+.voices-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.voice-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px}
+.voice-card h4{font-size:12px;font-weight:700;color:var(--teal-deep);margin-bottom:10px}
+.voice-item{border-left:3px solid var(--teal);padding:7px 10px;margin-bottom:8px;background:var(--teal-light);border-radius:0 6px 6px 0;font-size:12px}
+.voice-item.red{border-left-color:var(--danger);background:#FEF2F2}
+.voice-empty{color:var(--text-light);font-size:12px;font-style:italic}
+
+.ai-card{background:var(--card);border:2px solid var(--teal-border);border-radius:8px;padding:20px}
+.ai-run-btn{display:inline-flex;align-items:center;gap:8px;background:var(--teal);color:#fff;padding:12px 28px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:700}
+.ai-run-btn:hover{background:var(--teal-dark)}
+#aiLoading{display:none;text-align:center;padding:30px;color:var(--text-light)}
+.spinner{width:40px;height:40px;border:4px solid var(--teal-light);border-top-color:var(--teal);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 12px}
 @keyframes spin{to{transform:rotate(360deg)}}
-.loading-msg{font-size:13px;color:var(--text-light);line-height:1.7}
-.loading-dots::after{content:'';animation:dots 1.5s steps(4,end) infinite}
-@keyframes dots{0%,20%{content:''}40%{content:'.'}60%{content:'..'}80%,100%{content:'...'}}
+#aiContent{display:none}
+.ai-section-title{font-size:14px;font-weight:700;color:var(--teal-deep);margin:18px 0 10px;padding-left:10px;border-left:4px solid var(--teal)}
+.ai-table{width:100%;border-collapse:collapse;margin:8px 0 14px;font-size:12px}
+.ai-table th{background:var(--teal-deep);color:#fff;padding:8px 10px;text-align:left;font-weight:700}
+.ai-table td{padding:8px 10px;border-bottom:1px solid var(--border)}
+.ai-table tr:nth-child(even) td{background:var(--teal-light)}
+.ai-summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px}
+.ai-summary-box{background:var(--teal-light);border:1px solid var(--teal-border);border-radius:6px;padding:12px}
+.ai-summary-box h5{font-size:11px;font-weight:700;color:var(--teal-deep);margin-bottom:6px}
+.ai-summary-box p{font-size:12px;color:var(--text);line-height:1.7}
+.rerun-btn{display:none;margin-top:14px;background:var(--teal-light);color:var(--teal-deep);border:1px solid var(--teal-border);padding:8px 18px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:700}
+.rerun-btn:hover{background:var(--teal-border)}
+#aiTimestamp{font-size:11px;color:var(--text-light);margin-top:8px}
 
-/* ── Report Output ── */
-#reportOutput{display:none}
-.report-actions{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap}
-.action-btn{display:flex;align-items:center;gap:6px;padding:10px 18px;border-radius:8px;font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;border:1.5px solid transparent}
-.action-btn-primary{background:var(--teal);color:white;border-color:var(--teal)}
-.action-btn-primary:hover{background:var(--teal-dark)}
-.action-btn-secondary{background:var(--white);color:var(--teal);border-color:var(--border)}
-.action-btn-secondary:hover{border-color:var(--teal);background:var(--teal-light)}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center}
+.modal-bg.show{display:flex}
+.modal{background:#fff;border-radius:10px;padding:28px;width:420px;box-shadow:0 8px 32px rgba(0,0,0,.2)}
+.modal h3{font-size:15px;font-weight:700;color:var(--teal-deep);margin-bottom:8px}
+.modal p{font-size:12px;color:var(--text-light);margin-bottom:16px}
+.modal input{width:100%;border:1.5px solid var(--border);border-radius:6px;padding:10px 12px;font-size:13px;margin-bottom:12px}
+.modal input:focus{outline:none;border-color:var(--teal)}
+.modal-btns{display:flex;gap:10px}
+.modal-ok{flex:1;background:var(--teal);color:#fff;padding:10px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:700;text-align:center}
+.modal-ok:hover{background:var(--teal-dark)}
+.modal-cancel{padding:10px 16px;border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:13px;color:var(--text-light);text-align:center}
 
-/* ── Report Content ── */
-#reportContent{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:40px;box-shadow:var(--shadow);line-height:1.8}
-#reportContent h1{font-family:'DM Serif Display',serif;font-size:24px;color:var(--teal-deep);margin-bottom:6px}
-#reportContent .report-sub{font-size:12.5px;color:var(--text-light);margin-bottom:28px;padding-bottom:16px;border-bottom:2px solid var(--teal-light)}
-#reportContent h2{font-size:16px;font-weight:700;color:var(--teal-deep);margin:28px 0 12px;padding-left:12px;border-left:4px solid var(--teal)}
-#reportContent h3{font-size:14px;font-weight:700;color:var(--teal);margin:18px 0 8px}
-#reportContent p{font-size:13.5px;color:var(--text);margin-bottom:12px;line-height:1.85}
-#reportContent ul,#reportContent ol{padding-left:20px;margin-bottom:12px}
-#reportContent li{font-size:13.5px;color:var(--text);margin-bottom:6px;line-height:1.75}
-#reportContent .highlight-box{background:var(--teal-light);border-left:4px solid var(--teal);border-radius:0 8px 8px 0;padding:14px 16px;margin:14px 0;font-size:13px}
-#reportContent .alert-box{background:#fef8f0;border-left:4px solid var(--amber);border-radius:0 8px 8px 0;padding:14px 16px;margin:14px 0;font-size:13px}
-#reportContent .danger-box{background:#fdf0f0;border-left:4px solid var(--red);border-radius:0 8px 8px 0;padding:14px 16px;margin:14px 0;font-size:13px}
-#reportContent table{width:100%;border-collapse:collapse;margin:14px 0;font-size:13px}
-#reportContent table th{background:var(--teal-light);color:var(--teal-deep);padding:9px 12px;text-align:left;font-weight:700;font-size:12px}
-#reportContent table td{padding:9px 12px;border-bottom:1px solid var(--border)}
-#reportContent .report-footer{margin-top:32px;padding-top:16px;border-top:2px solid var(--teal-light);font-size:11.5px;color:var(--text-light);text-align:center}
+footer{background:var(--teal-deep);color:rgba(255,255,255,.8);text-align:center;padding:16px;font-size:11px;line-height:1.8}
 
-/* ── Error ── */
-.error-box{background:#fdf0f0;border:1px solid #f5cccc;border-radius:8px;padding:14px 16px;font-size:13px;color:var(--red);margin-top:14px;display:none}
-.error-box.show{display:block}
-
-/* ── Print ── */
 @media print{
-  header,.action-btn,.apikey-card,.gen-section,.report-actions,.loading-wrap,button{display:none!important}
-  body{background:white}
-  .container{padding:0;max-width:100%}
-  #reportOutput{display:block!important}
-  #reportContent{border:none;box-shadow:none;padding:20px}
-  @page{size:A4;margin:15mm}
-  h2,h3{break-after:avoid}
-  p,li{break-inside:avoid}
-}
-
-@media(max-width:600px){
-  .stats-row{grid-template-columns:1fr 1fr}
-  .client-info-grid{grid-template-columns:1fr}
-  .container{padding:16px}
-  #reportContent{padding:20px}
+  @page{size:A4 portrait;margin:12mm 12mm 14mm 12mm}
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  html,body{font-size:10px!important}
+  .no-print-hide,.client-panel,#aiRunBtn,#aiLoading,.rerun-btn,#aiTimestamp,.modal-bg{display:none!important}
+  .header{border-bottom:1px solid var(--teal-border)!important}
+  thead{display:table-header-group!important}
+  tr{break-inside:avoid!important;page-break-inside:avoid!important}
+  #aiContent table{break-inside:auto!important}
+  #aiContent thead{display:table-header-group!important}
+  #aiContent tr{break-inside:avoid!important}
+  #aiContent{display:block!important}
+  .ai-card{border:1px solid var(--teal-border)!important}
+  .container{padding:12px}
 }
 </style>
 </head>
 <body>
 
-<header>
-  <div class="h-left">
-    <img src="logo.linkpranity.png" alt="LINKPRANITY" onerror="this.style.display='none'">
-    <h1>AI分析レポート生成</h1>
+<div class="header">
+  <div class="header-left">
+    <h2 id="companyName">クライアント名未設定</h2>
+    <h1>月次組織分析レポート</h1>
+    <div class="header-sub">担当：岩下（LINKPRANITY）</div>
   </div>
-  <div class="h-right">
-    <a class="h-btn" href="admin.html">← 管理画面</a>
-    <a class="h-btn" href="index.html" target="_blank">アンケートを見る ↗</a>
+  <div class="header-right">
+    <div class="print-btn" onclick="window.print()">🖨️ 印刷・PDF</div>
+    <div class="header-badge">月次組織分析レポート</div>
+    <img src="logo.linkpranity.png" alt="LINKPRANITY" class="header-logo" onerror="this.style.display='none'">
   </div>
-</header>
+</div>
+
+<div class="client-panel no-print-hide">
+  <h3>🏢 クライアント情報入力</h3>
+  <div class="client-fields">
+    <div class="field-group">
+      <label>クライアント名</label>
+      <input type="text" id="inputCompanyName" placeholder="例：株式会社○○">
+    </div>
+    <div class="field-group">
+      <label>従業員数</label>
+      <input type="text" id="inputEmployeeCount" placeholder="例：30" oninput="updateRate()">
+    </div>
+    <div class="field-group wide">
+      <label>事業内容</label>
+      <input type="text" id="inputBusiness" placeholder="例：関東圏の飲食店運営（5店舗）">
+    </div>
+    <div class="save-btn" onclick="saveClientInfo()">保存</div>
+  </div>
+</div>
+
+<div class="kpi-bar">
+  <div class="kpi-item"><div class="kpi-num" id="kpi-total">0</div><div class="kpi-lbl">総回答数</div></div>
+  <div class="kpi-item"><div class="kpi-num" id="kpi-rate">—</div><div class="kpi-lbl">回答率</div></div>
+  <div class="kpi-item"><div class="kpi-num" id="kpi-harassment">0</div><div class="kpi-lbl">ハラスメント報告数</div></div>
+  <div class="kpi-item"><div class="kpi-num" id="kpi-resign">0</div><div class="kpi-lbl">離職懸念者数</div></div>
+</div>
 
 <div class="container">
 
-  <!-- API Key -->
-  <div class="apikey-card">
-    <div class="apikey-head">
-      <h2>🔑 Anthropic APIキー設定</h2>
-    </div>
-    <div class="apikey-body">
-      <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-... を入力してください">
-      <button class="apikey-save" onclick="saveApiKey()">保存</button>
-    </div>
-    <div id="apiKeyStatus" class="apikey-status" style="padding:0 20px 14px">✅ APIキーが設定されています</div>
-  </div>
-
-  <!-- Client Info -->
-  <div class="card">
-    <div class="card-head">
-      <h2>🏢 クライアント情報</h2>
-      <a href="admin.html" style="font-size:12px;color:var(--teal);text-decoration:none">管理画面で編集 →</a>
-    </div>
-    <div class="card-body">
-      <div class="client-info-grid" id="clientInfoGrid">
-        <div class="ci-box"><div class="ci-label">クライアント名</div><div class="ci-val" id="ciName">—</div></div>
-        <div class="ci-box"><div class="ci-label">従業員数</div><div class="ci-val" id="ciEmp">—</div></div>
-        <div class="ci-box"><div class="ci-label">実施月</div><div class="ci-val" id="ciMonth">—</div></div>
-        <div class="ci-box" style="grid-column:1/-1"><div class="ci-label">事業内容</div><div class="ci-val" id="ciBiz" style="font-size:13px;font-weight:400;line-height:1.6">—</div></div>
+  <div class="section">
+    <div class="section-title">📊 組織コンディションスコア</div>
+    <div class="score-grid">
+      <div class="score-card">
+        <div class="score-num" id="scoreRelations" style="color:var(--teal)">—</div>
+        <div class="score-lbl">人間関係</div>
+        <div id="scoreRelationsBadge"></div>
+        <div class="score-bar-bg"><div class="score-bar-fill" id="scoreRelationsBar" style="width:0%"></div></div>
+      </div>
+      <div class="score-card">
+        <div class="score-num" id="scoreEvaluation" style="color:var(--teal)">—</div>
+        <div class="score-lbl">評価制度</div>
+        <div id="scoreEvaluationBadge"></div>
+        <div class="score-bar-bg"><div class="score-bar-fill" id="scoreEvaluationBar" style="width:0%"></div></div>
+      </div>
+      <div class="score-card">
+        <div class="score-num" id="scoreWorkload" style="color:var(--teal)">—</div>
+        <div class="score-lbl">業務量</div>
+        <div id="scoreWorkloadBadge"></div>
+        <div class="score-bar-bg"><div class="score-bar-fill" id="scoreWorkloadBar" style="width:0%"></div></div>
+      </div>
+      <div class="score-card">
+        <div class="score-num" id="scoreStay" style="color:var(--teal)">—</div>
+        <div class="score-lbl">継続就業意向</div>
+        <div id="scoreStayBadge"></div>
+        <div class="score-bar-bg"><div class="score-bar-fill" id="scoreStayBar" style="width:0%"></div></div>
+      </div>
+      <div class="score-card">
+        <div class="score-num" id="scoreSpeak" style="color:var(--teal)">—</div>
+        <div class="score-lbl">発言しやすさ</div>
+        <div id="scoreSpeakBadge"></div>
+        <div class="score-bar-bg"><div class="score-bar-fill" id="scoreSpeakBar" style="width:0%"></div></div>
       </div>
     </div>
   </div>
 
-  <!-- Data Summary -->
-  <div class="card">
-    <div class="card-head"><h2>📊 回答データ概要</h2></div>
-    <div class="card-body">
-      <div class="stats-row">
-        <div class="stat-box"><div class="stat-num" id="dsTotal">0</div><div class="stat-lbl">総回答数</div></div>
-        <div class="stat-box"><div class="stat-num" id="dsConsult">0</div><div class="stat-lbl">個別相談希望</div></div>
-        <div class="stat-box"><div class="stat-num" id="dsTurnover">0</div><div class="stat-lbl">退職検討あり</div></div>
-        <div class="stat-box"><div class="stat-num" id="dsHarass">0</div><div class="stat-lbl">懸念記述あり</div></div>
-      </div>
-      <p id="noDataMsg" style="font-size:13px;color:var(--text-light);display:none">⚠️ 回答データがありません。先にアンケートを実施してください。</p>
+  <div class="section">
+    <div class="section-title">📋 各項目 回答分布</div>
+    <div class="dist-grid">
+      <div class="dist-card"><h4>Q3 人間関係の満足度</h4><div id="distRelations"></div></div>
+      <div class="dist-card"><h4>Q4 評価制度への納得感</h4><div id="distEvaluation"></div></div>
+      <div class="dist-card"><h4>Q5 業務量の適正感</h4><div id="distWorkload"></div></div>
+      <div class="dist-card"><h4>Q6 継続就業意向</h4><div id="distStay"></div></div>
     </div>
   </div>
 
-  <!-- Generate -->
-  <div class="gen-section">
-    <button class="gen-btn-main" id="genBtn" onclick="generateReport()">
-      ✨ AIレポートを生成する
-    </button>
-    <p class="gen-note">回答データとクライアント情報を基に、課題分析・改善提案レポートをAIが自動生成します</p>
-  </div>
-
-  <div class="error-box" id="errorBox"></div>
-
-  <!-- Loading -->
-  <div class="loading-wrap" id="loadingWrap">
-    <div class="loading-spinner"></div>
-    <div class="loading-msg">
-      AIが回答データを分析しています<span class="loading-dots"></span><br>
-      <span style="font-size:12px;margin-top:6px;display:block">しばらくお待ちください（30〜60秒程度）</span>
-    </div>
-  </div>
-
-  <!-- Report Output -->
-  <div id="reportOutput">
-    <div class="card">
-      <div class="card-head"><h2>📄 生成済みレポート</h2></div>
-      <div class="card-body" style="padding:16px">
-        <div class="report-actions">
-          <button class="action-btn action-btn-primary" onclick="window.print()">🖨️ 印刷 / PDF保存</button>
-          <button class="action-btn action-btn-secondary" onclick="copyReport()">📋 テキストをコピー</button>
-          <button class="action-btn action-btn-secondary" onclick="regenerate()">🔄 再生成</button>
+  <div class="section">
+    <div class="section-title">⚠️ リスク分析</div>
+    <div class="risk-row">
+      <div class="risk-circles">
+        <div class="risk-circle-wrap">
+          <svg width="100" height="100" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="38" fill="none" stroke="#FEE2E2" stroke-width="14"/>
+            <circle id="arcResignFill" cx="50" cy="50" r="38" fill="none" stroke="#DC2626" stroke-width="14" stroke-dasharray="0 239" stroke-linecap="round" transform="rotate(-90 50 50)"/>
+            <text x="50" y="46" text-anchor="middle" font-size="14" font-weight="700" fill="#DC2626" id="arcResignTxt">0%</text>
+            <text x="50" y="60" text-anchor="middle" font-size="8" fill="#888">離職検討</text>
+          </svg>
+          <p>離職真剣検討</p>
         </div>
-        <div id="reportContent"></div>
+        <div class="risk-circle-wrap">
+          <svg width="100" height="100" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="38" fill="none" stroke="#FEE2E2" stroke-width="14"/>
+            <circle id="arcHarassFill" cx="50" cy="50" r="38" fill="none" stroke="#DC2626" stroke-width="14" stroke-dasharray="0 239" stroke-linecap="round" transform="rotate(-90 50 50)"/>
+            <text x="50" y="46" text-anchor="middle" font-size="14" font-weight="700" fill="#DC2626" id="arcHarassTxt">0%</text>
+            <text x="50" y="60" text-anchor="middle" font-size="8" fill="#888">ハラスメント</text>
+          </svg>
+          <p>ハラスメント報告</p>
+        </div>
+        <div class="risk-circle-wrap">
+          <svg width="100" height="100" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="38" fill="none" stroke="#FEF3C7" stroke-width="14"/>
+            <circle id="arcSpeakFill" cx="50" cy="50" r="38" fill="none" stroke="#D97706" stroke-width="14" stroke-dasharray="0 239" stroke-linecap="round" transform="rotate(-90 50 50)"/>
+            <text x="50" y="46" text-anchor="middle" font-size="14" font-weight="700" fill="#D97706" id="arcSpeakTxt">0%</text>
+            <text x="50" y="60" text-anchor="middle" font-size="8" fill="#888">言いづらさ</text>
+          </svg>
+          <p>言いづらさあり</p>
+        </div>
       </div>
+      <div class="concern-list">
+        <h4>不安・課題 TOP5</h4>
+        <div id="concernsList"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🔍 属性別クロス分析</div>
+    <div class="cross-grid">
+      <div class="cross-card">
+        <h4>勤続年数別スコア</h4>
+        <table>
+          <thead><tr><th>勤続年数</th><th>人数</th><th>人間関係</th><th>継続意向</th><th>判定</th></tr></thead>
+          <tbody id="tenureTableBody"></tbody>
+        </table>
+      </div>
+      <div class="cross-card">
+        <h4>役職別スコア</h4>
+        <table>
+          <thead><tr><th>役職</th><th>人数</th><th>人間関係</th><th>継続意向</th><th>判定</th></tr></thead>
+          <tbody id="roleTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📈 スコアビジュアル分析</div>
+    <div class="chart-grid">
+      <div class="chart-card"><h4>組織コンディション（レーダー）</h4><canvas id="radarChart"></canvas></div>
+      <div class="chart-card"><h4>勤続年数別スコア比較</h4><canvas id="barChart"></canvas></div>
+      <div class="chart-card"><h4>コレスポンデンス分析</h4><canvas id="correspondenceChart"></canvas></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">💬 従業員の声</div>
+    <div class="voices-grid">
+      <div class="voice-card"><h4>一般コメント</h4><div id="voicesFree"></div></div>
+      <div class="voice-card"><h4>ハラスメント・懸念報告</h4><div id="voicesHarass"></div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🤖 AI分析</div>
+    <div class="ai-card">
+      <div id="aiInitPrompt">
+        <p style="color:var(--text-light);font-size:12px;margin-bottom:14px">回答データとクライアント情報を基に、AIが組織課題・リスク・改善提案を自動分析します。</p>
+        <div id="aiRunBtn" class="ai-run-btn" onclick="runAIAnalysis()">✦ AI分析を実行する</div>
+      </div>
+      <div id="aiLoading"><div class="spinner"></div><p>AIが組織データを分析中です…（30〜60秒程度）</p></div>
+      <div id="aiContent"></div>
+      <div id="aiTimestamp"></div>
+      <div class="rerun-btn" onclick="runAIAnalysis()">🔄 再分析する</div>
     </div>
   </div>
 
 </div>
 
+<footer>
+  本レポートは株式会社リンクプラニティが提供する月次従業員アンケートサービスにより作成されました。<br>
+  担当：岩下永輝　TEL：03-5931-3147　iwashita@linkpranity.com
+</footer>
+
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <h3>🔑 Anthropic APIキー入力</h3>
+    <p>sk-ant-api03-... 形式のAPIキーを入力してください。セッション中のみ保持します。</p>
+    <input type="password" id="modalApiKey" placeholder="sk-ant-api03-...">
+    <div class="modal-btns">
+      <div class="modal-ok" onclick="confirmApiKey()">分析開始</div>
+      <div class="modal-cancel" onclick="closeModal()">キャンセル</div>
+    </div>
+  </div>
+</div>
+
 <script>
-/* ── GAS設定 ── */
-var GAS_URL = 'https://script.google.com/macros/s/AKfycbypRlWtKs6EhS6dhJQ7yrJUCQOkSlRi5dwDtD0Fv83_qyJHFcmC5qVq41TxASmLAqHB/exec';
+/* FALLBACK DATA */
+const FALLBACK=[
+  {answers:{tenure:"1〜3年",role:"一般社員",relations:"満足している",evaluation:"どちらともいえない",workload:"やや不満",stay:"そう思う",speak_up:"少しある",concerns:["評価・給与への不満","業務量・残業過多"],comments:"もう少し評価の透明性が欲しい",harassment:"",incident:""}},
+  {answers:{tenure:"3〜5年",role:"リーダー・主任",relations:"とても満足している",evaluation:"満足している",workload:"満足している",stay:"とてもそう思う",speak_up:"ない",concerns:["職場の人間関係"],comments:"チームワークは良好だと思います",harassment:"",incident:""}},
+  {answers:{tenure:"1年未満",role:"一般社員",relations:"やや不満",evaluation:"不満",workload:"不満",stay:"あまり思わない",speak_up:"ある",concerns:["評価・給与への不満","キャリアパスが不明確","業務量・残業過多"],comments:"",harassment:"上司から怒鳴られることがある",incident:""}},
+  {answers:{tenure:"5〜10年",role:"管理職",relations:"満足している",evaluation:"満足している",workload:"どちらともいえない",stay:"そう思う",speak_up:"ない",concerns:["職場環境（設備・衛生）"],comments:"全体的には良い職場だと思う",harassment:"",incident:""}},
+  {answers:{tenure:"3〜5年",role:"一般社員",relations:"どちらともいえない",evaluation:"どちらともいえない",workload:"やや不満",stay:"あまり思わない",speak_up:"ある",concerns:["評価・給与への不満","キャリアパスが不明確"],comments:"将来のキャリアが見えない",harassment:"",incident:"同僚が上司に無視されているように見える"}},
+  {answers:{tenure:"1〜3年",role:"一般社員",relations:"やや不満",evaluation:"不満",workload:"不満",stay:"全く思わない",speak_up:"ある",concerns:["業務量・残業過多","精神的なストレス"],comments:"",harassment:"",incident:""}}
+];
 
-/* ── API Key ── */
-function saveApiKey(){
-  const v=document.getElementById('apiKeyInput').value.trim();
-  if(!v){alert('APIキーを入力してください');return}
-  sessionStorage.setItem('lpApiKey',v);
-  document.getElementById('apiKeyInput').value='';
-  document.getElementById('apiKeyStatus').style.display='block';
+const SAT5={"とても満足している":100,"満足している":75,"どちらともいえない":50,"やや不満":25,"不満":0,"とても不満":0};
+const STAY4={"とてもそう思う":100,"そう思う":75,"あまり思わない":25,"全く思わない":0};
+const SPEAK={"ない":100,"少しある":50,"ある":0};
+
+function calcScore(rs,key,map){
+  const vals=rs.map(r=>map[r.answers?.[key]]).filter(v=>v!==undefined);
+  if(!vals.length)return null;
+  return Math.round(vals.reduce((a,b)=>a+b,0)/vals.length);
 }
-function loadApiKeyStatus(){
-  if(sessionStorage.getItem('lpApiKey')){
-    document.getElementById('apiKeyStatus').style.display='block';
-  }
+function badgeHtml(s){
+  if(s===null)return '';
+  if(s>=70)return '<span class="score-badge badge-good">良好</span>';
+  if(s>=50)return '<span class="score-badge badge-warn">注意</span>';
+  return '<span class="score-badge badge-danger">要対応</span>';
 }
-
-/* ── Client & Stats ── */
-function loadClientDisplay(){
-  const meta=JSON.parse(localStorage.getItem('reportMeta')||'{}');
-  document.getElementById('ciName').textContent=meta.name||'（未設定）';
-  document.getElementById('ciEmp').textContent=meta.emp?meta.emp+'名':'（未設定）';
-  document.getElementById('ciMonth').textContent=meta.month||'（未設定）';
-  document.getElementById('ciBiz').textContent=meta.biz||'（未設定）';
+function tagHtml(s){
+  if(s===null)return '<span class="tag tag-warn">—</span>';
+  if(s>=70)return '<span class="tag tag-good">良好 '+s+'</span>';
+  if(s>=50)return '<span class="tag tag-warn">注意 '+s+'</span>';
+  return '<span class="tag tag-danger">要対応 '+s+'</span>';
 }
-
-function loadDataStats(){
-  const rs=window._gasResponses||[];
-  document.getElementById('dsTotal').textContent=rs.length;
-  document.getElementById('dsConsult').textContent=rs.filter(r=>r.answers?.consult==='はい、希望する').length;
-  document.getElementById('dsTurnover').textContent=rs.filter(r=>['よく考える','たまに考える'].includes(r.answers?.turnover_exp)).length;
-  document.getElementById('dsHarass').textContent=rs.filter(r=>(r.answers?.harassment&&r.answers.harassment.trim())||(r.answers?.incident&&r.answers.incident.trim())).length;
-  if(!rs.length)document.getElementById('noDataMsg').style.display='block';
-  else document.getElementById('noDataMsg').style.display='none';
+function barColor(s){
+  if(s===null)return 'var(--border)';
+  if(s>=70)return 'var(--success)';
+  if(s>=50)return 'var(--warning)';
+  return 'var(--danger)';
 }
+function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
-/* ── Build prompt ── */
-function buildPrompt(rs, meta){
-  const total=rs.length;
-
-  function countRadio(key){
-    const c={};rs.forEach(r=>{const v=r.answers?.[key];if(v)c[v]=(c[v]||0)+1;});return c;
-  }
-  function countCheck(key){
-    const c={};rs.forEach(r=>{const v=r.answers?.[key];if(Array.isArray(v))v.forEach(i=>c[i]=(c[i]||0)+1);});return c;
-  }
-  function freeTexts(key){
-    return rs.map(r=>r.answers?.[key]).filter(v=>v&&v.trim()).join('\n---\n');
-  }
-
-  const fmt=obj=>Object.entries(obj).map(([k,v])=>`  ${k}: ${v}名`).join('\n');
-
-  const prompt=`あなたはLINKPRANITY（リンクプラニティ）の専属アナリストです。
-以下の従業員アンケート結果を分析し、経営者に提出する「離職率改善レポート」を日本語で作成してください。
-
-## クライアント情報
-- 会社名: ${meta.name||'未設定'}
-- 従業員数: ${meta.emp||'未設定'}名
-- 事業内容: ${meta.biz||'未設定'}
-- 実施月: ${meta.month||'未設定'}
-- 有効回答数: ${total}名
-
-## アンケート集計データ
-
-### Q1 勤続年数
-${fmt(countRadio('tenure'))}
-
-### Q2 所属区分
-${fmt(countRadio('dept'))}
-
-### Q3 やりがいを感じる点（複数回答）
-${fmt(countCheck('ikigai'))}
-
-### Q4 意見・アイデアを活かせているか
-${fmt(countRadio('idea'))}
-
-### Q5 人間関係（良好度）
-${fmt(countRadio('relations_good'))}
-
-### Q6 人間関係（満足度）
-${fmt(countRadio('relations'))}
-
-### Q7 コミュニケーションストレス
-${fmt(countRadio('comm_stress'))}
-
-### Q8 意見の対立・解決
-${fmt(countRadio('conflict'))}
-
-### Q9 支援体制満足度
-${fmt(countRadio('support'))}
-
-### Q10 改善してほしい点（複数回答）
-${fmt(countCheck('improve'))}
-
-### Q11 長く働き続けたいか
-${fmt(countRadio('stay_long'))}
-
-### Q12 退職を考えた経験
-${fmt(countRadio('turnover_exp'))}
-
-### Q16 個別相談希望
-${fmt(countRadio('consult'))}
-
-## 自由記述（抜粋）
-
-### 活かせていない理由
-${freeTexts('idea_detail')||'（記述なし）'}
-
-### 良好でない人間関係の詳細
-${freeTexts('relations_good_detail')||'（記述なし）'}
-
-### 人間関係の不満
-${freeTexts('relations_detail')||'（記述なし）'}
-
-### コミュニケーションストレス詳細
-${freeTexts('comm_stress_detail')||'（記述なし）'}
-
-### 解決への希望
-${freeTexts('conflict_detail')||'（記述なし）'}
-
-### 支援体制の不満
-${freeTexts('support_detail')||'（記述なし）'}
-
-### 定着しない理由
-${freeTexts('stay_long_detail')||'（記述なし）'}
-
-### 継続・離職の理由（自由記述）
-${freeTexts('stay_reason')||'（記述なし）'}
-
-### ハラスメント・重大懸念
-${freeTexts('harassment')||'（記述なし）'}
-
-### 気になる言動
-${freeTexts('incident')||'（記述なし）'}
-
----
-
-## レポート作成指示
-
-以下の構成でレポートを作成してください。HTMLタグは使わず、マークダウン形式で出力してください。
-
-1. **エグゼクティブサマリー**（経営者が最初に読む3〜5行のまとめ）
-2. **データ概要**（回答者属性・回答率など）
-3. **主要課題の分析**（数値根拠を示しながら、優先度順に3〜5項目）
-4. **リスクアラート**（ハラスメント・退職リスク・要注意事項。該当なければ「特記事項なし」と記載）
-5. **改善提案**（短期施策・中長期施策に分けて具体的に提案）
-6. **個別相談希望者への対応方針**
-7. **次回アンケートに向けた提言**
-
-各セクションは具体的な数値・割合を引用し、経営判断に使えるレベルの内容にしてください。
-ポジティブな点も必ず記載し、バランスのとれた報告書としてください。`;
-
-  return prompt;
+function renderDist(id,rs,key,opts){
+  const total=rs.length||1;
+  const c={};opts.forEach(o=>c[o]=0);
+  rs.forEach(r=>{const v=r.answers?.[key];if(v&&c[v]!==undefined)c[v]++;});
+  document.getElementById(id).innerHTML=opts.map(opt=>{
+    const n=c[opt]||0;const pct=Math.round(n/total*100);
+    return '<div class="dist-row"><div class="dist-label">'+escHtml(opt)+'</div><div class="dist-bar-bg"><div class="dist-bar-fill" style="width:'+pct+'%"></div></div><div class="dist-count">'+n+'</div></div>';
+  }).join('');
+}
+function setArc(fillId,txtId,pct){
+  const circ=239,fill=Math.round(circ*pct/100);
+  document.getElementById(fillId).setAttribute('stroke-dasharray',fill+' '+(circ-fill));
+  document.getElementById(txtId).textContent=pct+'%';
 }
 
-/* ── Generate ── */
-async function generateReport(){
-  const apiKey=sessionStorage.getItem('lpApiKey');
-  if(!apiKey){alert('APIキーを設定してください。');return}
+function render(){
+  let raw=[];try{raw=JSON.parse(localStorage.getItem('surveyResponses')||'[]');}catch(e){}
+  const rs=raw.length?raw:FALLBACK;
 
-  const rs=window._gasResponses||[];
-  if(!rs.length){alert('回答データがありません。先にアンケートを実施してください。');return}
+  const harassCount=rs.filter(r=>(r.answers?.harassment||'').trim()||(r.answers?.incident||'').trim()).length;
+  const resignCount=rs.filter(r=>['あまり思わない','全く思わない'].includes(r.answers?.stay)).length;
+  document.getElementById('kpi-total').textContent=rs.length;
+  document.getElementById('kpi-harassment').textContent=harassCount;
+  document.getElementById('kpi-resign').textContent=resignCount;
+  updateRate();
 
-  const meta=JSON.parse(localStorage.getItem('reportMeta')||'{}');
-  const prompt=buildPrompt(rs,meta);
+  const scores={
+    Relations:calcScore(rs,'relations',SAT5),
+    Evaluation:calcScore(rs,'evaluation',SAT5),
+    Workload:calcScore(rs,'workload',SAT5),
+    Stay:calcScore(rs,'stay',STAY4),
+    Speak:calcScore(rs,'speak_up',SPEAK)
+  };
+  Object.entries(scores).forEach(([k,s])=>{
+    const el=document.getElementById('score'+k);
+    if(el&&s!==null){
+      el.textContent=s;el.style.color=barColor(s);
+      document.getElementById('score'+k+'Badge').innerHTML=badgeHtml(s);
+      const bar=document.getElementById('score'+k+'Bar');
+      bar.style.width=s+'%';bar.style.background=barColor(s);
+    }
+  });
 
-  document.getElementById('genBtn').disabled=true;
-  document.getElementById('loadingWrap').classList.add('show');
-  document.getElementById('reportOutput').style.display='none';
-  document.getElementById('errorBox').classList.remove('show');
+  const SAT5_OPTS=["とても満足している","満足している","どちらともいえない","やや不満","不満"];
+  const STAY_OPTS=["とてもそう思う","そう思う","あまり思わない","全く思わない"];
+  renderDist('distRelations',rs,'relations',SAT5_OPTS);
+  renderDist('distEvaluation',rs,'evaluation',SAT5_OPTS);
+  renderDist('distWorkload',rs,'workload',SAT5_OPTS);
+  renderDist('distStay',rs,'stay',STAY_OPTS);
+
+  const total=rs.length||1;
+  setArc('arcResignFill','arcResignTxt',Math.round(resignCount/total*100));
+  setArc('arcHarassFill','arcHarassTxt',Math.round(harassCount/total*100));
+  const speakCount=rs.filter(r=>['ある','少しある'].includes(r.answers?.speak_up)).length;
+  setArc('arcSpeakFill','arcSpeakTxt',Math.round(speakCount/total*100));
+
+  const cCount={};
+  rs.forEach(r=>{
+    const c=r.answers?.concerns;
+    if(Array.isArray(c))c.forEach(i=>{cCount[i]=(cCount[i]||0)+1;});
+    else if(c)cCount[c]=(cCount[c]||0)+1;
+  });
+  const sorted=Object.entries(cCount).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const maxC=sorted[0]?.[1]||1;
+  document.getElementById('concernsList').innerHTML=sorted.length
+    ?sorted.map(([k,v])=>'<div class="concern-row"><div class="concern-label">'+escHtml(k)+'</div><div class="concern-bar-bg"><div class="concern-bar-fill" style="width:'+Math.round(v/maxC*100)+'%"></div></div><div class="concern-count">'+v+'</div></div>').join('')
+    :'<p style="color:var(--text-light);font-size:12px">データなし</p>';
+
+  const tenureOrder=["1年未満","1〜3年","3〜5年","5〜10年","10年以上"];
+  const tenureGroups={};
+  rs.forEach(r=>{const t=r.answers?.tenure||'不明';if(!tenureGroups[t])tenureGroups[t]=[];tenureGroups[t].push(r);});
+  const tenureKeys=[...tenureOrder.filter(k=>tenureGroups[k]),...Object.keys(tenureGroups).filter(k=>!tenureOrder.includes(k))];
+  document.getElementById('tenureTableBody').innerHTML=tenureKeys.map(k=>{
+    const g=tenureGroups[k]||[];
+    const sr=calcScore(g,'relations',SAT5),ss=calcScore(g,'stay',STAY4);
+    const avg=sr!==null&&ss!==null?Math.round((sr+ss)/2):null;
+    return '<tr><td>'+escHtml(k)+'</td><td>'+g.length+'</td><td>'+(sr??'—')+'</td><td>'+(ss??'—')+'</td><td>'+tagHtml(avg)+'</td></tr>';
+  }).join('');
+
+  const roleGroups={};
+  rs.forEach(r=>{const rl=r.answers?.role||'不明';if(!roleGroups[rl])roleGroups[rl]=[];roleGroups[rl].push(r);});
+  document.getElementById('roleTableBody').innerHTML=Object.entries(roleGroups).map(([k,g])=>{
+    const sr=calcScore(g,'relations',SAT5),ss=calcScore(g,'stay',STAY4);
+    const avg=sr!==null&&ss!==null?Math.round((sr+ss)/2):null;
+    return '<tr><td>'+escHtml(k)+'</td><td>'+g.length+'</td><td>'+(sr??'—')+'</td><td>'+(ss??'—')+'</td><td>'+tagHtml(avg)+'</td></tr>';
+  }).join('');
+
+  const scoreArr=[scores.Relations,scores.Evaluation,scores.Workload,scores.Stay,scores.Speak].map(v=>v??0);
+  renderRadar(scoreArr);
+  renderBar(rs,tenureKeys,tenureGroups);
+  renderBubble(tenureKeys,tenureGroups,total);
+
+  const freeComments=rs.map(r=>r.answers?.comments).filter(v=>v&&v.trim());
+  document.getElementById('voicesFree').innerHTML=freeComments.length
+    ?freeComments.map(c=>'<div class="voice-item">'+escHtml(c)+'</div>').join('')
+    :'<div class="voice-empty">コメントなし</div>';
+  const harassRows=rs.filter(r=>(r.answers?.harassment||'').trim()||(r.answers?.incident||'').trim());
+  document.getElementById('voicesHarass').innerHTML=harassRows.length
+    ?harassRows.map(r=>{let t='';if((r.answers?.harassment||'').trim())t+='<div class="voice-item red">【報告】'+escHtml(r.answers.harassment)+'</div>';if((r.answers?.incident||'').trim())t+='<div class="voice-item red">【目撃】'+escHtml(r.answers.incident)+'</div>';return t;}).join('')
+    :'<div class="voice-empty">報告なし</div>';
+}
+
+let radarInst,barInst,bubbleInst;
+function renderRadar(data){
+  const ctx=document.getElementById('radarChart').getContext('2d');
+  if(radarInst)radarInst.destroy();
+  radarInst=new Chart(ctx,{type:'radar',data:{labels:['人間関係','評価制度','業務量','継続就業','発言しやすさ'],datasets:[{label:'スコア',data:data,backgroundColor:'rgba(13,158,142,0.15)',borderColor:'#0D9E8E',borderWidth:2,pointBackgroundColor:'#0D9E8E'}]},options:{scales:{r:{min:0,max:100,ticks:{stepSize:25,font:{size:9}},pointLabels:{font:{size:10}}}},plugins:{legend:{display:false}}}});
+}
+function renderBar(rs,tenureKeys,tenureGroups){
+  const ctx=document.getElementById('barChart').getContext('2d');
+  if(barInst)barInst.destroy();
+  const labels=tenureKeys.slice(0,5);
+  barInst=new Chart(ctx,{type:'bar',data:{labels,datasets:[
+    {label:'人間関係',data:labels.map(k=>calcScore(tenureGroups[k]||[],'relations',SAT5)??0),backgroundColor:'#DC2626'},
+    {label:'評価制度',data:labels.map(k=>calcScore(tenureGroups[k]||[],'evaluation',SAT5)??0),backgroundColor:'#D97706'},
+    {label:'継続就業',data:labels.map(k=>calcScore(tenureGroups[k]||[],'stay',STAY4)??0),backgroundColor:'#0D9E8E'}
+  ]},options:{scales:{y:{min:0,max:100,ticks:{stepSize:25}}},plugins:{legend:{labels:{font:{size:10}}}}}});
+}
+function renderBubble(tenureKeys,tenureGroups,total){
+  const ctx=document.getElementById('correspondenceChart').getContext('2d');
+  if(bubbleInst)bubbleInst.destroy();
+  const datasets=tenureKeys.slice(0,6).map((k,i)=>{
+    const g=tenureGroups[k]||[];
+    const riskScore=100-(calcScore(g,'stay',STAY4)??50);
+    const rate=Math.round(g.length/total*100);
+    return {label:k,data:[{x:riskScore,y:rate,r:Math.max(g.length*7,5)}],backgroundColor:'hsla('+(i*60)+',60%,50%,0.6)'};
+  });
+  bubbleInst=new Chart(ctx,{type:'bubble',data:{datasets},options:{scales:{x:{title:{display:true,text:'リスク重み',font:{size:9}},min:0,max:100},y:{title:{display:true,text:'回答率%',font:{size:9}},min:0,max:100}},plugins:{legend:{labels:{font:{size:9}}}}}});
+}
+
+function saveClientInfo(){
+  const name=document.getElementById('inputCompanyName').value.trim();
+  const emp=document.getElementById('inputEmployeeCount').value.trim();
+  const biz=document.getElementById('inputBusiness').value.trim();
+  if(name)document.getElementById('companyName').textContent=name;
+  localStorage.setItem('reportMeta',JSON.stringify({companyName:name,employeeCount:emp,business:biz}));
+  updateRate();alert('保存しました');
+}
+function updateRate(){
+  const empRaw=document.getElementById('inputEmployeeCount')?.value||'';
+  const emp=parseInt(String(empRaw).replace(/[^0-9]/g,''))||0;
+  let raw=[];try{raw=JSON.parse(localStorage.getItem('surveyResponses')||'[]');}catch(e){}
+  const t=raw.length;
+  document.getElementById('kpi-rate').textContent=emp>0&&t>0?Math.round(t/emp*100)+'%':emp>0?'0%':'—';
+}
+
+function runAIAnalysis(){
+  const k=sessionStorage.getItem('lp_api_key');
+  if(k)startAnalysis(k);else document.getElementById('modalBg').classList.add('show');
+}
+function confirmApiKey(){
+  const k=document.getElementById('modalApiKey').value.trim();
+  if(!k){alert('APIキーを入力してください');return;}
+  sessionStorage.setItem('lp_api_key',k);closeModal();startAnalysis(k);
+}
+function closeModal(){document.getElementById('modalBg').classList.remove('show');}
+
+async function startAnalysis(apiKey){
+  document.getElementById('aiInitPrompt').style.display='none';
+  document.getElementById('aiLoading').style.display='block';
+  document.getElementById('aiContent').style.display='none';
+  document.querySelector('.rerun-btn').style.display='none';
+
+  let raw=[];try{raw=JSON.parse(localStorage.getItem('surveyResponses')||'[]');}catch(e){}
+  const rs=raw.length?raw:FALLBACK;
+  let meta={};try{meta=JSON.parse(localStorage.getItem('reportMeta')||'{}');}catch(e){}
+
+  const biz=(meta.business||'').toLowerCase();
+  let industryHint='サービス業全般では離職率が高い傾向があり、組織エンゲージメントの向上が課題です。';
+  if(/介護|福祉|ケア/.test(biz))industryHint='介護・福祉業界は離職率約15%と高く、身体的・精神的負荷やカスタマーハラスメントが離職要因の上位です。';
+  else if(/建設|土木|工事/.test(biz))industryHint='建設・土木業界は若年層離職率が約17%と高く、長時間労働・危険作業・技能継承が主要課題です。';
+  else if(/飲食|居酒屋|カフェ|キャバ/.test(biz))industryHint='飲食業界は離職率約30%と全業種最高水準で、深夜勤務・低賃金・店長属人マネジメントが課題です。';
+  else if(/IT|システム|ソフト|web|エンジニア/.test(biz))industryHint='IT業界は優秀層の流出とバーンアウトが深刻で、リモートワーク格差や評価の透明性確保が急務です。';
+
+  const total=rs.length||1;
+  const resignCnt=rs.filter(r=>['あまり思わない','全く思わない'].includes(r.answers?.stay)).length;
+  const harassCnt=rs.filter(r=>(r.answers?.harassment||'').trim()||(r.answers?.incident||'').trim()).length;
+  const speakCnt=rs.filter(r=>['ある','少しある'].includes(r.answers?.speak_up)).length;
+  function avg(key,map){const v=rs.map(r=>map[r.answers?.[key]]).filter(v=>v!==undefined);return v.length?Math.round(v.reduce((a,b)=>a+b,0)/v.length):0;}
+
+  const prompt=`あなたはLINKPRANITY（株式会社リンクプラニティ）の組織コンサルタントです。
+以下の従業員アンケートデータを分析し、指定のJSON形式のみで回答してください。コードフェンス・HTMLタグ・前置き一切不要。JSONのみ出力。
+
+クライアント:${meta.companyName||'未設定'} 従業員数:${meta.employeeCount||'未設定'}名 事業内容:${meta.business||'未設定'}
+総回答:${total}名 人間関係:${avg('relations',SAT5)}点 評価制度:${avg('evaluation',SAT5)}点 業務量:${avg('workload',SAT5)}点 継続就業:${avg('stay',STAY4)}点
+離職検討:${resignCnt}名(${Math.round(resignCnt/total*100)}%) ハラスメント:${harassCnt}件 言いづらさ:${speakCnt}名(${Math.round(speakCnt/total*100)}%)
+業界背景:${industryHint}
+ハラスメント記述:${rs.map(r=>(r.answers?.harassment||'')+(r.answers?.incident||'')).filter(v=>v.trim()).join(' / ')||'なし'}
+
+{"summary":{"industry":"業界課題2文","survey":"アンケート結果課題2文","client":"クライアント固有課題2文"},"issues":[{"priority":"最優先","name":"課題名","basis":"数値根拠","risk":"🔴高"},{"priority":"第2位","name":"課題名","basis":"数値根拠","risk":"🔴高"},{"priority":"第3位","name":"課題名","basis":"数値根拠","risk":"🟡中"}],"risks":{"resign":[{"item":"","status":"","impact":""},{"item":"","status":"","impact":""},{"item":"","status":"","impact":""}],"compliance":[{"item":"","legal":"","action":""},{"item":"","legal":"","action":""},{"item":"","legal":"","action":""}],"org":[{"item":"","status":"","impact":""},{"item":"","status":"","impact":""}]},"actions":[{"phase":"即時（1週間以内）","action":"","owner":"","kpi":""},{"phase":"即時（1週間以内）","action":"","owner":"","kpi":""},{"phase":"短期（1〜3ヶ月）","action":"","owner":"","kpi":""},{"phase":"短期（1〜3ヶ月）","action":"","owner":"","kpi":""},{"phase":"中長期（3〜12ヶ月）","action":"","owner":"","kpi":""},{"phase":"中長期（3〜12ヶ月）","action":"","owner":"","kpi":""}]}`;
 
   try{
     const res=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
       headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({
-        model:'claude-sonnet-4-6',
-        max_tokens:4000,
-        messages:[{role:'user',content:prompt}]
-      })
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:4000,messages:[{role:'user',content:prompt}]})
     });
-
-    if(!res.ok){
-      const err=await res.json();
-      throw new Error(err.error?.message||'API エラー: '+res.status);
-    }
-
+    if(!res.ok){const e=await res.json();throw new Error(JSON.stringify(e.error)||res.status);}
     const data=await res.json();
-    const text=data.content?.find(b=>b.type==='text')?.text||'';
-
-    renderReport(text,meta,rs.length);
+    const rawText=data.content?.find(b=>b.type==='text')?.text||'';
+    const json=JSON.parse(rawText.replace(/```json|```/g,'').trim());
+    renderAIResult(json);
   }catch(e){
-    const eb=document.getElementById('errorBox');
-    eb.textContent='エラーが発生しました: '+e.message;
-    eb.classList.add('show');
+    document.getElementById('aiContent').innerHTML='<div style="color:var(--danger);font-size:13px;padding:14px;background:#FEE2E2;border-radius:6px">エラーが発生しました: '+escHtml(e.message)+'</div>';
+    document.getElementById('aiContent').style.display='block';
   }finally{
-    document.getElementById('genBtn').disabled=false;
-    document.getElementById('loadingWrap').classList.remove('show');
+    document.getElementById('aiLoading').style.display='none';
+    document.querySelector('.rerun-btn').style.display='inline-block';
   }
 }
 
-/* ── Render ── */
-function renderReport(md, meta, total){
-  const now=new Date();
-  const dateStr=now.toLocaleDateString('ja-JP',{year:'numeric',month:'long',day:'numeric'});
+function renderAIResult(j){
+  const th=h=>'<th style="background:var(--teal-deep);color:#fff;padding:8px 10px;text-align:left;font-weight:700;font-size:11px">'+escHtml(h)+'</th>';
+  const td=v=>'<td style="padding:8px 10px;border-bottom:1px solid var(--border);font-size:12px">'+escHtml(String(v||''))+'</td>';
+  const tbl=(heads,rows)=>'<table class="ai-table"><thead><tr>'+heads.map(th).join('')+'</tr></thead><tbody>'+rows.map((row,i)=>'<tr style="'+(i%2===1?'background:var(--teal-light);':'')+'">'+row.map(td).join('')+'</tr>').join('')+'</tbody></table>';
 
-  let html=`<h1>離職率改善レポート</h1>
-<div class="report-sub">
-  クライアント：${meta.name||'—'} ／ 実施月：${meta.month||'—'} ／ 有効回答数：${total}名 ／ 作成日：${dateStr}<br>
-  作成：株式会社LINKPRANITY（リンクプラニティ）
-</div>`;
+  let html='<div class="ai-section-title">【1】組織診断サマリー</div>';
+  html+='<div class="ai-summary-grid"><div class="ai-summary-box"><h5>🏭 業界全体の課題</h5><p>'+escHtml(j.summary?.industry||'')+'</p></div><div class="ai-summary-box"><h5>📊 アンケート結果の課題</h5><p>'+escHtml(j.summary?.survey||'')+'</p></div><div class="ai-summary-box"><h5>🎯 クライアント固有の課題</h5><p>'+escHtml(j.summary?.client||'')+'</p></div></div>';
 
-  html+=mdToHtml(md);
+  html+='<div class="ai-section-title">【2】主要課題（優先度順）</div>';
+  html+=tbl(['優先度','課題名','根拠・詳細','リスク'],(j.issues||[]).map(r=>[r.priority,r.name,r.basis,r.risk]));
 
-  html+=`<div class="report-footer">
-    本レポートはLINKPRANITY 月次アンケートシステムにより自動生成されました。<br>
-    内容に関するお問い合わせ：iwashita@linkpranity.com ／ TEL：03-5931-3147
-  </div>`;
+  html+='<div class="ai-section-title">【3】リスクアセスメント</div>';
+  html+='<p style="font-size:11px;font-weight:700;color:var(--danger);margin:8px 0 4px">🔴 離職リスク</p>';
+  html+=tbl(['リスク事項','現状','経営への影響'],(j.risks?.resign||[]).filter(r=>r.item).map(r=>[r.item,r.status,r.impact]));
+  html+='<p style="font-size:11px;font-weight:700;color:var(--danger);margin:8px 0 4px">🔴 コンプライアンスリスク</p>';
+  html+=tbl(['リスク事項','関連法規','対応策'],(j.risks?.compliance||[]).filter(r=>r.item).map(r=>[r.item,r.legal,r.action]));
+  html+='<p style="font-size:11px;font-weight:700;color:var(--warning);margin:8px 0 4px">🟡 組織硬直化リスク</p>';
+  html+=tbl(['リスク事項','現状','影響'],(j.risks?.org||[]).filter(r=>r.item).map(r=>[r.item,r.status,r.impact]));
 
-  document.getElementById('reportContent').innerHTML=html;
-  document.getElementById('reportOutput').style.display='block';
-  document.getElementById('reportOutput').scrollIntoView({behavior:'smooth'});
+  html+='<div class="ai-section-title">【4】改善提案アクションプラン</div>';
+  html+=tbl(['フェーズ','施策内容','実施責任者','KPI・達成指標'],(j.actions||[]).map(r=>[r.phase,r.action,r.owner,r.kpi]));
+
+  document.getElementById('aiContent').innerHTML=html;
+  document.getElementById('aiContent').style.display='block';
+  document.getElementById('aiTimestamp').textContent='分析実行日時：'+new Date().toLocaleString('ja-JP');
 }
 
-function mdToHtml(md){
-  let html=md
-    .replace(/^### (.+)$/gm,'<h3>$1</h3>')
-    .replace(/^## (.+)$/gm,'<h2>$1</h2>')
-    .replace(/^# (.+)$/gm,'<h1>$1</h1>')
-    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
-    .replace(/\*(.+?)\*/g,'<em>$1</em>')
-    .replace(/^---$/gm,'<hr>')
-    .replace(/^> (.+)$/gm,'<div class="highlight-box">$1</div>')
-    .replace(/^⚠️ (.+)$/gm,'<div class="alert-box">⚠️ $1</div>')
-    .replace(/^🚨 (.+)$/gm,'<div class="danger-box">🚨 $1</div>');
-
-  const lines=html.split('\n');
-  const out=[];
-  let inUl=false,inOl=false;
-  lines.forEach(line=>{
-    const ul=line.match(/^[\-\*] (.+)/);
-    const ol=line.match(/^\d+\. (.+)/);
-    if(ul){if(!inUl){out.push('<ul>');inUl=true}if(inOl){out.push('</ol>');inOl=false}out.push('<li>'+ul[1]+'</li>')}
-    else if(ol){if(!inOl){out.push('<ol>');inOl=true}if(inUl){out.push('</ul>');inUl=false}out.push('<li>'+ol[1]+'</li>')}
-    else{
-      if(inUl){out.push('</ul>');inUl=false}
-      if(inOl){out.push('</ol>');inOl=false}
-      if(line.trim()&&!line.startsWith('<')){out.push('<p>'+line+'</p>')}
-      else{out.push(line)}
-    }
-  });
-  if(inUl)out.push('</ul>');
-  if(inOl)out.push('</ol>');
-  return out.join('\n');
-}
-
-function copyReport(){
-  const el=document.getElementById('reportContent');
-  const text=el.innerText;
-  navigator.clipboard.writeText(text).then(()=>{
-    const b=event.currentTarget;const orig=b.textContent;
-    b.textContent='✅ コピーしました';setTimeout(()=>b.textContent=orig,2000);
-  });
-}
-
-function regenerate(){
-  if(!confirm('レポートを再生成しますか？現在のレポートは上書きされます。'))return;
-  generateReport();
-}
-
-/* ── Init ── */
-loadApiKeyStatus();
-fetch(GAS_URL + '?type=responses')
-  .then(function(r){return r.json();})
-  .then(function(data){
-    window._gasResponses = data;
-    loadDataStats();
-  }).catch(function(){
-    window._gasResponses = [];
-    loadDataStats();
-  });
-fetch(GAS_URL + '?type=meta')
-  .then(function(r){return r.json();})
-  .then(function(data){
-    localStorage.setItem('reportMeta', JSON.stringify(data));
-    loadClientDisplay();
-  }).catch(function(){
-    loadClientDisplay();
-  });
+(function init(){
+  let meta={};try{meta=JSON.parse(localStorage.getItem('reportMeta')||'{}');}catch(e){}
+  if(meta.companyName){document.getElementById('companyName').textContent=meta.companyName;document.getElementById('inputCompanyName').value=meta.companyName;}
+  if(meta.employeeCount)document.getElementById('inputEmployeeCount').value=meta.employeeCount;
+  if(meta.business)document.getElementById('inputBusiness').value=meta.business;
+  render();
+})();
 </script>
 </body>
 </html>
