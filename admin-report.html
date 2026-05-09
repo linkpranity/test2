@@ -630,12 +630,70 @@ function renderAIResult(j){
   document.getElementById('aiTimestamp').textContent='分析実行日時：'+new Date().toLocaleString('ja-JP');
 }
 
+
+/* ═══════════════════════════════
+   GAS連携（データ取得）
+═══════════════════════════════ */
+var GAS_URL = 'https://script.google.com/macros/s/AKfycbypRlWtKs6EhS6dhJQ7yrJUCQOkSlRi5dwDtD0Fv83_qyJHFcmC5qVq41TxASmLAqHB/exec';
+
+function loadFromGAS() {
+  // responses取得
+  fetch(GAS_URL + '?type=responses')
+    .then(function(r){return r.json();})
+    .then(function(data){
+      // GASデータの形式を自動判定
+      var arr = [];
+      if(Array.isArray(data)){
+        arr = data; // [{tenure:...}, ...] 形式
+      } else if(data && Array.isArray(data.responses)){
+        arr = data.responses; // {responses:[...]} 形式
+      } else if(data && Array.isArray(data.data)){
+        arr = data.data; // {data:[...]} 形式
+      }
+      
+      if(arr.length > 0){
+        var converted = arr.map(function(d){
+          // すでに {answers:{...}} 形式ならそのまま、フラットなら{answers:d}でラップ
+          return d.answers ? d : {answers: d};
+        });
+        localStorage.setItem('surveyResponses', JSON.stringify(converted));
+        // デバッグ表示
+        document.getElementById('kpi-total').textContent = converted.length;
+      }
+      render();
+    })
+    .catch(function(e){
+      console.error('GAS fetch error:', e);
+      render();
+    });
+
+  // meta取得
+  fetch(GAS_URL + '?type=meta')
+    .then(function(r){return r.json();})
+    .then(function(data){
+      if(data && data.name){
+        var meta = {
+          companyName: data.name || '',
+          employeeCount: data.emp || '',
+          business: data.biz || ''
+        };
+        localStorage.setItem('reportMeta', JSON.stringify(meta));
+        if(meta.companyName) document.getElementById('companyName').textContent = meta.companyName;
+        if(meta.employeeCount) document.getElementById('inputEmployeeCount').value = meta.employeeCount;
+        if(meta.business) document.getElementById('inputBusiness').value = meta.business;
+        document.getElementById('inputCompanyName').value = meta.companyName;
+        updateRate();
+      }
+    })
+    .catch(function(){});
+}
+
 (function init(){
   let meta={};try{meta=JSON.parse(localStorage.getItem('reportMeta')||'{}');}catch(e){}
   if(meta.companyName){document.getElementById('companyName').textContent=meta.companyName;document.getElementById('inputCompanyName').value=meta.companyName;}
   if(meta.employeeCount)document.getElementById('inputEmployeeCount').value=meta.employeeCount;
   if(meta.business)document.getElementById('inputBusiness').value=meta.business;
-  render();
+  loadFromGAS();
 })();
 </script>
 </body>
