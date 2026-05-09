@@ -355,15 +355,15 @@ footer{background:var(--teal-deep);color:rgba(255,255,255,.8);text-align:center;
 <script>
 /* FALLBACK DATA */
 const FALLBACK=[
-  {answers:{tenure:"1〜3年",dept:"一般社員",relations:"やや満足している",support:"どちらでもない",comm_stress:"多少ある",idea:"やや活かせていない",stay_long:"やや思う",improve:["評価制度","業務量"],comments:"もう少し評価の透明性が欲しい",harassment:"",incident:""}},
-  {answers:{tenure:"3〜5年",dept:"リーダー・主任",relations:"とても満足している",support:"とても満足している",comm_stress:"まったくない",idea:"よく活かせている",stay_long:"とても思う",improve:[],comments:"チームワークは良好だと思います",harassment:"",incident:""}},
-  {answers:{tenure:"1年未満",dept:"一般社員",relations:"やや不満",support:"やや不満",comm_stress:"とてもある",idea:"全く活かせていない",stay_long:"あまり思わない",improve:["評価制度","給与・待遇","業務量"],comments:"",harassment:"上司から怒鳴られることがある",incident:""}},
+  {answers:{tenure:"1〜3年",dept:"一般社員",relations:"やや不満",support:"どちらでもない",comm_stress:"多少ある",idea:"やや活かせている",stay_long:"やや思う",improve:["評価制度","業務量"],comments:"もう少し評価の透明性が欲しい",harassment:"",incident:""}},
+  {answers:{tenure:"3〜5年",dept:"管理職（部長・課長）",relations:"とても満足している",support:"とても満足",comm_stress:"まったくない",idea:"よく活かせている",stay_long:"とても思う",improve:["評価制度","給与・待遇"],comments:"チームワークは良好だと思います",harassment:"",incident:""}},
+  {answers:{tenure:"1年未満",dept:"パート・アルバイト",relations:"やや不満",support:"とても不満",comm_stress:"多少ある",idea:"あまり活かせていない",stay_long:"あまり思わない",improve:["評価制度","業務量"],comments:"",harassment:"",incident:""}},
   {answers:{tenure:"5〜10年",dept:"管理職",relations:"やや満足している",support:"やや満足している",comm_stress:"ほとんどない",idea:"やや活かせている",stay_long:"やや思う",improve:[],comments:"全体的には良い職場だと思う",harassment:"",incident:""}},
   {answers:{tenure:"3〜5年",dept:"一般社員",relations:"どちらでもない",support:"どちらでもない",comm_stress:"多少ある",idea:"あまり活かせていない",stay_long:"あまり思わない",improve:["評価制度","給与・待遇"],comments:"将来のキャリアが見えない",harassment:"",incident:"同僚が上司に無視されているように見える"}},
   {answers:{tenure:"1〜3年",dept:"一般社員",relations:"やや不満",support:"やや不満",comm_stress:"とてもある",idea:"全く活かせていない",stay_long:"全く思わない",improve:["業務量","精神的なストレス"],comments:"",harassment:"",incident:""}}
 ];
 
-const SAT5={"とても満足している":100,"やや満足している":75,"どちらでもない":50,"やや不満":25,"とても不満":0};
+const SAT5={"とても満足している":100,"満足している":100,"やや満足している":75,"どちらでもない":50,"やや不満":25,"不満":0,"とても不満":0};
 const STAY4={"とても思う":100,"やや思う":75,"あまり思わない":25,"全く思わない":0};
 const SPEAK={"ない":100,"少しある":50,"ある":0};
 
@@ -420,8 +420,8 @@ function render(){
 
   const scores={
     Relations:calcScore(rs,'relations',SAT5),
-    Evaluation:calcScore(rs,'support',SAT5),
-    Workload:calcScore(rs,'comm_stress',{'まったくない':100,'ほとんどない':75,'多少ある':25,'とてもある':0}),
+    Evaluation:calcScore(rs,'support',{'とても満足':100,'やや満足':75,'どちらでもない':50,'やや不満':25,'とても不満':0}),
+    Workload:calcScore(rs,'comm_stress',{'まったくない':100,'ほとんどない':75,'多少ある':50,'とてもある':0}),
     Stay:calcScore(rs,'stay_long',STAY4),
     Speak:calcScore(rs,'idea',{'よく活かせている':100,'やや活かせている':75,'あまり活かせていない':25,'全く活かせていない':0})
   };
@@ -435,10 +435,10 @@ function render(){
     }
   });
 
-  const SAT5_OPTS=["とても満足している","やや満足している","どちらでもない","やや不満","とても不満"];
+  const SAT5_OPTS=["とても満足している","満足している","やや満足している","どちらでもない","やや不満","不満","とても不満"];
   const STAY_OPTS=["とても思う","やや思う","あまり思わない","全く思わない"];
   renderDist('distRelations',rs,'relations',SAT5_OPTS);
-  renderDist('distEvaluation',rs,'support',SAT5_OPTS);
+  renderDist('distEvaluation',rs,'support',['とても満足','やや満足','どちらでもない','やや不満','とても不満']);
   renderDist('distWorkload',rs,'comm_stress',['まったくない','ほとんどない','多少ある','とてもある']);
   renderDist('distStay',rs,'stay_long',STAY_OPTS);
 
